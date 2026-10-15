@@ -4,9 +4,9 @@
 
 [x] Lab 1 - Project structure and Technical Specification.
 
-[x] Lab 2 - All required views, controllers, models (huh?)
+[] Lab 2 - All required views, controllers, models (huh?)
 
-[x] Lab 3 - ...
+[] Lab 3 - ...
 
 [] Lab 4 -
 
