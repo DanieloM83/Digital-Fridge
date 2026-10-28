@@ -1,0 +1,31 @@
+.header-bar {
+    background: var(--dwf-glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--dwf-glass-border);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    transition: all var(--dwf-transition);
+}
+
+.header-bar ::deep .navbar-brand {
+    font-size: 1.25rem;
+    letter-spacing: 0.02em;
+}
+
+.header-bar ::deep .nav-link {
+    color: var(--dwf-text-muted) !important;
+    transition: color var(--dwf-transition);
+}
+
+.header-bar ::deep .nav-link:hover,
+.header-bar ::deep .nav-link.active {
+    color: var(--dwf-text-primary) !important;
+}
+
+.header-bar ::deep .dropdown-menu {
+    min-width: 8rem;
+}
