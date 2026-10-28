@@ -1,0 +1,30 @@
+.hero-cta-card {
+    background: var(--dwf-glass-bg);
+    border: 1px solid var(--dwf-glass-border);
+    border-radius: 1rem;
+    backdrop-filter: blur(var(--dwf-glass-blur));
+    -webkit-backdrop-filter: blur(var(--dwf-glass-blur));
+    max-width: 680px;
+    width: 100%;
+}
+
+.hero-title {
+    font-size: 2.5rem;
+}
+
+.hero-slogan {
+    max-width: 540px;
+    color: var(--dwf-text-muted);
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+@media (max-width: 575.98px) {
+    .hero-title {
+        font-size: 1.75rem;
+    }
+
+    .hero-slogan {
+        font-size: 0.95rem;
+    }
+}
