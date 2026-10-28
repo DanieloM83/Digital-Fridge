@@ -1,0 +1,20 @@
+:root {
+    /* Brand colors */
+    --dwf-brown: #4a2e1b;
+    --dwf-brown-light: rgba(80, 50, 28, 0.75);
+    --dwf-accent-warm: #e29578;
+    --dwf-cream-light: #fff8f0;
+    --dwf-text-primary: #fff;
+    --dwf-text-muted: rgba(255, 255, 255, 0.75);
+
+    /* Glassmorphism */
+    --dwf-glass-bg: rgba(35, 23, 16, 0.45);
+    --dwf-glass-border: rgba(255, 255, 255, 0.18);
+    --dwf-glass-blur: 16px;
+
+    /* Typography */
+    --dwf-font-logo: "Playfair Display", "Times New Roman", serif;
+
+    /* Transitions */
+    --dwf-transition: 0.2s ease;
+}

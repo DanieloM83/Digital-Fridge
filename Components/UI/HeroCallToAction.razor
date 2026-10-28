@@ -1,0 +1,36 @@
+@*
+    HeroCallToAction - The glassmorphism card displayed in the center of the hero section.
+    Contains the brand title, slogan, and action buttons.
+*@
+
+<div class="hero-cta-card text-center text-white p-5 p-md-5 mx-3">
+    <h1 class="hero-title fw-bold mb-3" style="font-family: var(--dwf-font-logo);">
+        Digital Web Fridge
+    </h1>
+    <p class="hero-slogan lead mb-4 mx-auto">
+        Track ingredients effortlessly, reduce food waste, and cook delicious warm meals
+        with whatever you have left in your kitchen.
+    </p>
+    <div class="d-flex flex-column flex-sm-row justify-content-center align-items-center gap-3">
+        @if (IsAuthenticated)
+        {
+            @* TODO: Update href when Workspace page is implemented *@
+            <a href="/workspace" class="btn btn-light btn-lg fw-semibold px-4">
+                Go to workspace
+            </a>
+        }
+        else
+        {
+            <GoogleSignInButton />
+        }
+        <a href="/recipes" class="btn btn-outline-light btn-lg fw-semibold px-4">
+            View public recipes
+        </a>
+    </div>
+</div>
+
+@code {
+    // TODO: Replace with actual authentication state
+    [Parameter] public bool IsAuthenticated { get; set; } = false;
+}
+

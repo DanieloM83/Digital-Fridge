@@ -1,0 +1,77 @@
+@*
+    Header - Top navigation bar.
+    Brown, semi-transparent, fixed on top.
+    Left: Logo + nav links.  Right: auth controls.
+*@
+
+@inject NavigationManager Navigation
+
+<header class="header-bar">
+    <nav class="navbar navbar-expand-md navbar-dark py-2 px-3 px-md-4">
+        <div class="container-fluid">
+            @* Left: Logo *@
+            <a class="navbar-brand fw-bold me-4" href="/" style="font-family: var(--dwf-font-logo);">
+                Digital Web Fridge
+            </a>
+
+            @* Mobile toggler *@
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#headerNav"
+                    aria-controls="headerNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            @* Collapsible area *@
+            <div class="collapse navbar-collapse" id="headerNav">
+                @* Left nav links *@
+                <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="recipes" Match="NavLinkMatch.Prefix">
+                            <i class="bi bi-book me-1" aria-hidden="true"></i>Recipes
+                        </NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="workspace" Match="NavLinkMatch.Prefix">
+                            <i class="bi bi-egg-fried me-1" aria-hidden="true"></i>Workspace
+                        </NavLink>
+                    </li>
+                </ul>
+
+                @* Auth area *@
+                <div class="d-flex align-items-center">
+                    @if (IsAuthenticated)
+                    {
+                        @* Authenticated: avatar + name + dropdown *@
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-link text-white text-decoration-none dropdown-toggle d-flex align-items-center p-0"
+                                type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-circle fs-5 me-2" aria-hidden="true"></i>
+                                <span class="me-1">@UserName</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li>
+                                    @* TODO: Wire to actual logout endpoint *@
+                                    <a class="dropdown-item" href="/api/auth/logout">
+                                        <i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        @* Unauthenticated: Google Sign In *@
+                        <GoogleSignInButton />
+                    }
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+
+@code {
+    // TODO: Replace with actual authentication state (e.g., CascadingAuthenticationState)
+    [Parameter] public bool IsAuthenticated { get; set; } = false;
+    [Parameter] public string UserName { get; set; } = "User";
+}
+

@@ -1,0 +1,27 @@
+@*
+    ErrorCard - Reusable glassmorphism card for error/status pages.
+    Displays a title, message, and action buttons.
+*@
+
+<div class="hero-cta-card text-center text-white p-4 p-md-5 mx-3">
+    <h1 class="hero-title fw-bold mb-3" style="font-family: var(--dwf-font-logo);">
+        @Title
+    </h1>
+    <p class="hero-slogan lead mb-4 mx-auto">
+        @Message
+    </p>
+    <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
+        <a href="/" class="btn btn-light btn-lg fw-semibold px-4">
+            Go to homepage
+        </a>
+        <a href="/recipes" class="btn btn-outline-light btn-lg fw-semibold px-4">
+            View public recipes
+        </a>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = "Oops!";
+    [Parameter] public string Message { get; set; } = "Something went wrong.";
+}
+
