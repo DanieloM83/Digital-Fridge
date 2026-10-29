@@ -1,7 +1,7 @@
 @*
     Header - Top navigation bar.
     Brown, semi-transparent, fixed on top.
-    Left: Logo + nav links.  Right: auth controls.
+    Left: Logo + nav links. Right: auth controls.
 *@
 
 @inject NavigationManager Navigation
@@ -36,42 +36,39 @@
                     </li>
                 </ul>
 
-                @* Auth area *@
+                @* Right: Auth area *@
                 <div class="d-flex align-items-center">
-                    @if (IsAuthenticated)
-                    {
-                        @* Authenticated: avatar + name + dropdown *@
-                        <div class="dropdown">
-                            <button
-                                class="btn btn-link text-white text-decoration-none dropdown-toggle d-flex align-items-center p-0"
-                                type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-person-circle fs-5 me-2" aria-hidden="true"></i>
-                                <span class="me-1">@UserName</span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li>
-                                    @* TODO: Wire to actual logout endpoint *@
-                                    <a class="dropdown-item" href="/api/auth/logout">
-                                        <i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>Logout
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    }
-                    else
-                    {
-                        @* Unauthenticated: Google Sign In *@
-                        <GoogleSignInButton />
-                    }
+                    <AuthorizeView>
+                        <Authorized>
+                            <div class="dropdown">
+                                <button
+                                    class="btn btn-link text-white text-decoration-none dropdown-toggle d-flex align-items-center p-0"
+                                    type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    @if (!string.IsNullOrEmpty(context.User.FindFirst("picture")?.Value))
+                                    {
+                                        <img src="@context.User.FindFirst("picture")?.Value" class="rounded-circle me-2" width="28" height="28" alt="Avatar" />
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-person-circle fs-5 me-2" aria-hidden="true"></i>
+                                    }
+                                    <span class="me-1">@(context.User.Identity?.Name ?? "User")</span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li>
+                                        <a class="dropdown-item" href="/api/auth/logout">
+                                            <i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>Logout
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </Authorized>
+                        <NotAuthorized>
+                            <GoogleSignInButton />
+                        </NotAuthorized>
+                    </AuthorizeView>
                 </div>
             </div>
         </div>
     </nav>
 </header>
-
-@code {
-    // TODO: Replace with actual authentication state (e.g., CascadingAuthenticationState)
-    [Parameter] public bool IsAuthenticated { get; set; } = false;
-    [Parameter] public string UserName { get; set; } = "User";
-}
-

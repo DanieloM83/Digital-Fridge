@@ -1,20 +1,16 @@
 @*
     GoogleSignInButton - Renders Google's official Sign In button via GSI library.
-    Place the GSI script in App.razor <head>; this component renders the target div.
 *@
 
-<div id="g_id_onload" data-client_id="YOUR_GOOGLE_CLIENT_ID" data-login_uri="/api/auth/google-callback"
-     data-auto_prompt="false">
+@inject IConfiguration Configuration
+
+<div id="g_id_onload" data-client_id="@ClientId" data-login_uri="/api/auth/google-callback" data-auto_prompt="false">
 </div>
 <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with"
      data-shape="rectangular" data-logo_alignment="left">
 </div>
 
-
-@* 
-    TODO: Integration steps:
-    1. Replace YOUR_GOOGLE_CLIENT_ID with actual Google OAuth client ID
-    2. Update data-login_uri to your actual callback endpoint
-    3. Wire up the authentication flow in Program.cs
-*@
-
+@code {
+    private string ClientId => Configuration["Authentication:Google:ClientId"] ??
+"YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
+}

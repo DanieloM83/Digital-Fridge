@@ -12,25 +12,18 @@
         with whatever you have left in your kitchen.
     </p>
     <div class="d-flex flex-column flex-sm-row justify-content-center align-items-center gap-3">
-        @if (IsAuthenticated)
-        {
-            @* TODO: Update href when Workspace page is implemented *@
-            <a href="/workspace" class="btn btn-light btn-lg fw-semibold px-4">
-                Go to workspace
-            </a>
-        }
-        else
-        {
-            <GoogleSignInButton />
-        }
+        <AuthorizeView>
+            <Authorized>
+                <a href="/workspace" class="btn btn-light btn-lg fw-semibold px-4">
+                    Go to workspace
+                </a>
+            </Authorized>
+            <NotAuthorized>
+                <GoogleSignInButton />
+            </NotAuthorized>
+        </AuthorizeView>
         <a href="/recipes" class="btn btn-outline-light btn-lg fw-semibold px-4">
             View public recipes
         </a>
     </div>
 </div>
-
-@code {
-    // TODO: Replace with actual authentication state
-    [Parameter] public bool IsAuthenticated { get; set; } = false;
-}
-
