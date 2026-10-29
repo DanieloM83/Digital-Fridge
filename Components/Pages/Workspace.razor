@@ -1,0 +1,44 @@
+@page "/workspace"
+@attribute [Authorize]
+
+<PageTitle>Workspace - Digital Web Fridge</PageTitle>
+
+<section class="workspace-hero d-flex align-items-center justify-content-center">
+    <div class="hero-cta-card text-center text-white p-5 mx-3">
+        <h1 class="hero-title fw-bold mb-3" style="font-family: var(--dwf-font-logo);">
+            Workspace
+        </h1>
+        <p class="hero-slogan lead mb-4 mx-auto">
+            Welcome to your private fridge workspace. Only authenticated users can see this page.
+        </p>
+
+        <AuthorizeView>
+            <Authorized>
+                <div class="d-flex align-items-center justify-content-center mb-4 gap-3">
+                    @if (!string.IsNullOrEmpty(context.User.FindFirst("picture")?.Value))
+                    {
+                        <img src="@context.User.FindFirst("picture")?.Value" class="rounded-circle border border-2 border-light" width="56" height="56" alt="Profile avatar" />
+                    }
+                    <div class="text-start">
+                        <div class="fw-bold fs-5">@context.User.Identity?.Name</div>
+                        <div class="text-white-50 small">@context.User.FindFirst(ClaimTypes.Email)?.Value</div>
+                    </div>
+                </div>
+
+                <div class="alert alert-success bg-opacity-25 text-white border-0 py-2 px-3 mb-4 mx-auto" style="max-width: 400px;">
+                    <i class="bi bi-shield-check me-2"></i>Authenticated via Google OAuth
+                </div>
+
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="/" class="btn btn-outline-light px-4">
+                        <i class="bi bi-house me-1"></i>Home
+                    </a>
+                    <a href="/api/auth/logout" class="btn btn-light fw-semibold px-4">
+                        <i class="bi bi-box-arrow-right me-1"></i>Logout
+                    </a>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+    </div>
+</section>
+
