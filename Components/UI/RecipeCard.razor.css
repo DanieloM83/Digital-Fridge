@@ -5,14 +5,21 @@
     border: 1px solid rgba(226, 149, 120, 0.25);
     border-radius: 1rem;
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), 0 0 15px rgba(226, 149, 120, 0.08);
-    transition: transform var(--dwf-transition), box-shadow var(--dwf-transition), border-color var(--dwf-transition);
+    box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.35),
+        0 0 15px rgba(226, 149, 120, 0.08);
+    transition:
+        transform var(--dwf-transition),
+        box-shadow var(--dwf-transition),
+        border-color var(--dwf-transition);
 }
 
 .recipe-card:hover {
     transform: translateY(-4px);
     border-color: rgba(226, 149, 120, 0.5);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45), 0 0 25px rgba(226, 149, 120, 0.2);
+    box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.45),
+        0 0 25px rgba(226, 149, 120, 0.2);
 }
 
 .recipe-card-img-wrapper {
@@ -50,4 +57,3 @@
 .border-white-10 {
     border-color: rgba(255, 255, 255, 0.1) !important;
 }
-

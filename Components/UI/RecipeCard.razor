@@ -28,7 +28,8 @@
             </div>
         }
 
-        <div class="card-footer bg-transparent border-top border-white-10 d-flex justify-content-between align-items-center px-0 pt-3 pb-0 small text-white-50">
+        <div
+            class="card-footer bg-transparent border-top border-white-10 d-flex justify-content-between align-items-center px-0 pt-3 pb-0 small text-white-50">
             <span>
                 <i class="bi bi-clock me-1 text-accent" aria-hidden="true"></i>
                 @Recipe.PrepTimeMinutes mins
@@ -45,4 +46,3 @@
     [Parameter, EditorRequired]
     public Recipe Recipe { get; set; } = default!;
 }
-

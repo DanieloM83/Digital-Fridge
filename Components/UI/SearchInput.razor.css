@@ -11,12 +11,16 @@
     overflow: hidden;
     padding: 0.35rem 0.75rem;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-    transition: border-color var(--dwf-transition), box-shadow var(--dwf-transition);
+    transition:
+        border-color var(--dwf-transition),
+        box-shadow var(--dwf-transition);
 }
 
 .search-input-group:focus-within {
     border-color: var(--dwf-accent-warm);
-    box-shadow: 0 0 16px rgba(226, 149, 120, 0.3), 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow:
+        0 0 16px rgba(226, 149, 120, 0.3),
+        0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .search-icon-addon {
@@ -56,4 +60,3 @@
 .search-clear-btn:hover {
     color: var(--dwf-text-primary);
 }
-

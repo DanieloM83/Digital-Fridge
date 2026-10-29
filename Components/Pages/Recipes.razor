@@ -8,7 +8,7 @@
     <div class="container pt-4 pb-5">
         @* Header & Guidance Search Section *@
         <div class="text-center text-white mb-5 mx-auto recipes-header-section">
-            <h1 class="recipes-title fw-bold mb-3" style="font-family: var(--dwf-font-logo);">
+            <h1 class="recipes-title fw-bold mb-3">
                 Community Recipes
             </h1>
             <p class="recipes-subtitle lead mb-4 mx-auto">
@@ -17,12 +17,10 @@
 
             @* Prominent Search Input with Contextual Guidance *@
             <div class="search-container mx-auto">
-                <SearchInput Value="@searchQuery"
-                             ValueChanged="OnSearchChanged"
+                <SearchInput Value="@searchQuery" ValueChanged="OnSearchChanged"
                              Placeholder="Search by ingredients (e.g. eggs, tomatoes, chicken) or recipe title..."
                              AriaLabel="Search recipes by ingredients or title" />
                 <div class="form-text text-white-50 mt-2 small">
-                    <i class="bi bi-lightbulb me-1 text-accent" aria-hidden="true"></i>
                     Tip: Enter ingredients separated by commas to filter by what is currently in your fridge
                 </div>
             </div>

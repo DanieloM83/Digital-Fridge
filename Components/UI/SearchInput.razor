@@ -12,19 +12,12 @@
             </span>
         }
 
-        <input type="text"
-               class="form-control search-input-control"
-               value="@Value"
-               @oninput="HandleInput"
-               placeholder="@Placeholder"
-               aria-label="@(AriaLabel ?? Placeholder)" />
+        <input type="text" class="form-control search-input-control" value="@Value" @oninput="HandleInput"
+               placeholder="@Placeholder" aria-label="@(AriaLabel ?? Placeholder)" />
 
         @if (ShowClearButton && !string.IsNullOrEmpty(Value))
         {
-            <button class="btn search-clear-btn"
-                    type="button"
-                    @onclick="ClearAsync"
-                    aria-label="Clear search">
+            <button class="btn search-clear-btn" type="button" @onclick="ClearAsync" aria-label="Clear search">
                 <i class="bi bi-x-circle-fill" aria-hidden="true"></i>
             </button>
         }

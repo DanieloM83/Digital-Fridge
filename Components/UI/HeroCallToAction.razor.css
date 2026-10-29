@@ -11,6 +11,7 @@
 
 .hero-title {
     background: linear-gradient(135deg, #ffffff 0%, #f3d2c1 100%);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     line-height: 3rem;
