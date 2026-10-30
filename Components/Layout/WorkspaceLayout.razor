@@ -1,0 +1,18 @@
+@inherits LayoutComponentBase
+
+<div class="workspace-layout d-flex flex-column v-100">
+    <Header />
+
+    <main class="workspace-main flex-grow-1 d-flex flex-column">
+        @Body
+    </main>
+
+    <WorkspaceNavDash />
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+

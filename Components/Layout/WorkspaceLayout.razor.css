@@ -1,0 +1,34 @@
+.workspace-layout {
+    background-color: var(--dwf-bg-dark);
+    /* Dotted grid pattern overlay */
+    background-image: radial-gradient(rgba(226, 149, 120, 0.16) 1.5px, transparent 1.5px);
+    background-size: 24px 24px;
+    background-position: 0 0;
+    min-height: 100vh;
+}
+
+.workspace-main {
+    padding-top: 4.5rem; /* Clearance for sticky header */
+    padding-bottom: 6rem; /* Clearance for bottom dash */
+}
+
+#blazor-error-ui {
+    color-scheme: light only;
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 2000;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}
