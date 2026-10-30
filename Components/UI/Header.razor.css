@@ -18,12 +18,14 @@
 
 .header-bar ::deep .nav-link {
     color: var(--dwf-text-muted) !important;
-    transition: color var(--dwf-transition);
+    transition: all var(--dwf-transition);
 }
 
 .header-bar ::deep .nav-link:hover,
 .header-bar ::deep .nav-link.active {
     color: var(--dwf-text-primary) !important;
+    border-radius: 10px;
+    background-color: var(--dwf-bg-dark);
 }
 
 .header-bar ::deep .dropdown-menu {

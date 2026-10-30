@@ -1,0 +1,61 @@
+@*
+    SearchInput - Reusable search input field with icon, contextual placeholder guidance,
+    clear button, and consistent glassmorphic styling across pages.
+*@
+
+<div class="search-input-wrapper @AdditionalClass">
+    <div class="input-group search-input-group">
+        @if (!string.IsNullOrEmpty(LeadingIcon))
+        {
+            <span class="input-group-text search-icon-addon">
+                <i class="bi @LeadingIcon" aria-hidden="true"></i>
+            </span>
+        }
+
+        <input type="text" class="form-control search-input-control" value="@Value" @oninput="HandleInput"
+               placeholder="@Placeholder" aria-label="@(AriaLabel ?? Placeholder)" />
+
+        @if (ShowClearButton && !string.IsNullOrEmpty(Value))
+        {
+            <button class="btn search-clear-btn" type="button" @onclick="ClearAsync" aria-label="Clear search">
+                <i class="bi bi-x-circle-fill" aria-hidden="true"></i>
+            </button>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Value { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    [Parameter]
+    public string Placeholder { get; set; } = "Search...";
+
+    [Parameter]
+    public string? LeadingIcon { get; set; } = "bi-search";
+
+    [Parameter]
+    public string? AriaLabel { get; set; }
+
+    [Parameter]
+    public bool ShowClearButton { get; set; } = true;
+
+    [Parameter]
+    public string? AdditionalClass { get; set; }
+
+    private async Task HandleInput(ChangeEventArgs e)
+    {
+        Value = e.Value?.ToString() ?? string.Empty;
+        await ValueChanged.InvokeAsync(Value);
+    }
+
+    private async Task ClearAsync()
+    {
+        Value = string.Empty;
+        await ValueChanged.InvokeAsync(Value);
+    }
+}
+

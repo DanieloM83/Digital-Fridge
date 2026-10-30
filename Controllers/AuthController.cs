@@ -55,8 +55,7 @@ public class AuthController : ControllerBase
         }
 
         var sessionId = Guid.NewGuid().ToString("N");
-        var session = new UserSession
-        {
+        var session = new UserSession {
             SessionId = sessionId,
             UserId = payload.Subject,
             Email = payload.Email,
@@ -82,8 +81,7 @@ public class AuthController : ControllerBase
         await HttpContext.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
             principal,
-            new AuthenticationProperties
-            {
+            new AuthenticationProperties {
                 IsPersistent = true,
                 ExpiresUtc = session.ExpiresAtUtc
             });

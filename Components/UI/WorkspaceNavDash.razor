@@ -1,0 +1,45 @@
+@*
+    WorkspaceNavDash - Bottom dock navigation bar for the workspace with 5 items:
+    Storage, Generate, Add product, Recipes, Profile.
+    Icon on top, label beneath, centered via flexbox.
+*@
+
+<nav class="workspace-dash-container" aria-label="Workspace Navigation">
+    <div class="workspace-dash-dock d-flex align-items-center justify-content-center">
+        <NavLink
+            class="workspace-dash-item d-flex flex-column align-items-center justify-content-center text-decoration-none"
+            href="workspace/storage" Match="NavLinkMatch.All">
+            <i class="bi bi-shop-window dash-icon" aria-hidden="true"></i>
+            <span class="dash-label">Storage</span>
+        </NavLink>
+
+        <NavLink
+            class="workspace-dash-item d-flex flex-column align-items-center justify-content-center text-decoration-none"
+            href="workspace/generate" Match="NavLinkMatch.All">
+            <i class="bi bi-arrow-clockwise dash-icon" aria-hidden="true"></i>
+            <span class="dash-label">Generate</span>
+        </NavLink>
+
+        <NavLink
+            class="workspace-dash-item d-flex flex-column align-items-center justify-content-center text-decoration-none"
+            href="workspace/add-product" Match="NavLinkMatch.All">
+            <i class="bi bi-patch-plus dash-icon" aria-hidden="true"></i>
+            <span class="dash-label">Add product</span>
+        </NavLink>
+
+        <NavLink
+            class="workspace-dash-item d-flex flex-column align-items-center justify-content-center text-decoration-none"
+            href="workspace/recipes" Match="NavLinkMatch.All">
+            <i class="bi bi-book dash-icon" aria-hidden="true"></i>
+            <span class="dash-label">Recipes</span>
+        </NavLink>
+
+        <NavLink
+            class="workspace-dash-item d-flex flex-column align-items-center justify-content-center text-decoration-none"
+            href="workspace/profile" Match="NavLinkMatch.All">
+            <i class="bi bi-person dash-icon" aria-hidden="true"></i>
+            <span class="dash-label">Profile</span>
+        </NavLink>
+    </div>
+</nav>
+

@@ -12,17 +12,14 @@ builder.Services.AddRazorComponents()
 builder.Services.AddControllers();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
+    .AddCookie(options => {
         options.Cookie.Name = "DigitalFridge.Auth";
         options.LoginPath = "/";
         options.LogoutPath = "/api/auth/logout";
         options.ExpireTimeSpan = TimeSpan.FromDays(7);
         options.SlidingExpiration = true;
-        options.Events = new CookieAuthenticationEvents
-        {
-            OnValidatePrincipal = async context =>
-            {
+        options.Events = new CookieAuthenticationEvents {
+            OnValidatePrincipal = async context => {
                 var sessionStore = context.HttpContext.RequestServices.GetRequiredService<ISessionStore>();
                 var sessionId = context.Principal?.FindFirst("session_id")?.Value;
                 if (string.IsNullOrEmpty(sessionId) || !sessionStore.IsSessionValid(sessionId))
@@ -37,6 +34,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddSingleton<ISessionStore, InMemorySessionStore>();
+builder.Services.AddSingleton<IRecipeService, InMemoryRecipeService>();
 
 var app = builder.Build();
 

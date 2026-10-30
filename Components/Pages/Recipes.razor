@@ -1,18 +1,90 @@
 @page "/recipes"
+@rendermode InteractiveServer
+@inject IRecipeService RecipeService
 
-<PageTitle>Recipes - Digital Web Fridge</PageTitle>
+<PageTitle>Public Recipes - Digital Web Fridge</PageTitle>
 
-<section class="recipes-hero d-flex align-items-center justify-content-center">
-    <div class="hero-cta-card text-center text-white p-5 mx-3">
-        <h1 class="hero-title fw-bold mb-3" style="font-family: var(--dwf-font-logo);">
-            Public Recipes
-        </h1>
-        <p class="hero-slogan lead mb-4 mx-auto">
-            Browse and discover recipes crafted from everyday fridge ingredients. (Coming soon)
-        </p>
-        <a href="/" class="btn btn-outline-light px-4">
-            <i class="bi bi-arrow-left me-1"></i>Back to Home
-        </a>
+<section class="recipes-page py-5">
+    <div class="container pt-4">
+        @* Header & Guidance Search Section *@
+        <div class="text-center text-white mb-5 mx-auto recipes-header-section">
+            <h1 class="recipes-title fw-bold mb-3">
+                Community Recipes
+            </h1>
+            <p class="recipes-subtitle lead mb-4 mx-auto">
+                Explore culinary ideas crafted from everyday fridge staples. Discover dishes you can make right now.
+            </p>
+
+            @* Prominent Search Input with Contextual Guidance *@
+            <div class="search-container mx-auto">
+                <SearchInput Value="@searchQuery" ValueChanged="OnSearchChanged"
+                             Placeholder="Search by ingredients (e.g. eggs, tomatoes, chicken) or recipe title..."
+                             AriaLabel="Search recipes by ingredients or title" />
+                <div class="form-text text-white-50 mt-2 small">
+                    Tip: Enter ingredients separated by commas to filter by what is currently in your fridge
+                </div>
+            </div>
+        </div>
+
+        @* Catalog Grid *@
+        @if (recipes == null)
+        {
+            <div class="d-flex justify-content-center py-5">
+                <div class="spinner-border text-light" role="status">
+                    <span class="visually-hidden">Loading recipes...</span>
+                </div>
+            </div>
+        }
+        else if (recipes.Count == 0)
+        {
+            <div class="text-center py-5 text-white empty-state-card mx-auto p-4">
+                <i class="bi bi-search fs-1 text-accent mb-3 d-block" aria-hidden="true"></i>
+                <h3 class="fw-bold mb-2">No matching recipes found</h3>
+                <p class="text-white-50 mb-3 small">
+                    Try searching with fewer ingredients, such as "eggs", "garlic", or "pasta".
+                </p>
+                <button class="btn btn-outline-light btn-sm" @onclick="ClearSearch">
+                    Show all recipes
+                </button>
+            </div>
+        }
+        else
+        {
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                @foreach (var recipe in recipes)
+                {
+                    <div class="col" @key="recipe.RecipeId">
+                        <RecipeCard Recipe="recipe" />
+                    </div>
+                }
+            </div>
+        }
     </div>
 </section>
 
+@code {
+    private string searchQuery = string.Empty;
+    private IReadOnlyList<Recipe>? recipes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRecipesAsync();
+    }
+
+    private async Task OnSearchChanged(string query)
+    {
+        searchQuery = query;
+        await LoadRecipesAsync();
+    }
+
+    private async Task ClearSearch()
+    {
+        searchQuery = string.Empty;
+        await LoadRecipesAsync();
+    }
+
+    private async Task LoadRecipesAsync()
+    {
+        recipes = await RecipeService.GetPublicRecipesAsync(searchQuery);
+    }
+}

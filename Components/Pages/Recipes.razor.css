@@ -1,13 +1,41 @@
-.recipes-hero {
+.recipes-page {
+    background-color: var(--dwf-bg-dark);
     min-height: 100vh;
-    background:
-        linear-gradient(
-            180deg,
-            rgba(20, 12, 8, 0.65) 0%,
-            rgba(20, 12, 8, 0.5) 50%,
-            rgba(15, 9, 6, 0.8) 100%
-        ),
-        url('https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=2070&auto=format&fit=crop')
-        center / cover no-repeat fixed;
 }
 
+.recipes-header-section {
+    max-width: 760px;
+}
+
+.recipes-title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: clamp(2.5rem, 5vw, 4rem);
+    letter-spacing: -0.01em;
+    font-family: var(--dwf-font-logo);
+    background: linear-gradient(135deg, #ffffff 0%, #f3d2c1 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.recipes-subtitle {
+    font-size: 1.15rem;
+    color: var(--dwf-text-muted);
+}
+
+.search-container {
+    max-width: 640px;
+}
+
+.text-accent {
+    color: var(--dwf-accent-warm);
+}
+
+.empty-state-card {
+    background: var(--dwf-glass-bg);
+    border: 1px solid var(--dwf-glass-border);
+    border-radius: 1rem;
+    backdrop-filter: blur(var(--dwf-glass-blur));
+    -webkit-backdrop-filter: blur(var(--dwf-glass-blur));
+    max-width: 480px;
+}
