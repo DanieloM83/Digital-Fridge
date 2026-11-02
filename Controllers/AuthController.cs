@@ -13,16 +13,16 @@ namespace Digital_Fridge.Controllers;
 [IgnoreAntiforgeryToken]
 public class AuthController : ControllerBase
 {
-    private readonly ISessionStore _sessionStore;
+    private readonly IAuthService _authService;
     private readonly IConfiguration _configuration;
     private readonly ILogger<AuthController> _logger;
 
     public AuthController(
-        ISessionStore sessionStore,
+        IAuthService authService,
         IConfiguration configuration,
         ILogger<AuthController> logger)
     {
-        _sessionStore = sessionStore;
+        _authService = authService;
         _configuration = configuration;
         _logger = logger;
     }
@@ -54,17 +54,12 @@ public class AuthController : ControllerBase
             return Unauthorized("Invalid token.");
         }
 
-        var sessionId = Guid.NewGuid().ToString("N");
-        var session = new UserSession {
-            SessionId = sessionId,
-            UserId = payload.Subject,
-            Email = payload.Email,
-            Name = payload.Name,
-            PictureUrl = payload.Picture,
-            ExpiresAtUtc = DateTime.UtcNow.AddDays(7)
-        };
-
-        _sessionStore.CreateSession(session);
+        var session = await _authService.CreateUserSessionAsync(
+            payload.Subject,
+            payload.Email,
+            payload.Name,
+            payload.Picture,
+            TimeSpan.FromDays(7));
 
         var claims = new List<Claim>
         {
@@ -72,7 +67,7 @@ public class AuthController : ControllerBase
             new(ClaimTypes.Name, payload.Name ?? payload.Email),
             new(ClaimTypes.Email, payload.Email),
             new("picture", payload.Picture ?? string.Empty),
-            new("session_id", sessionId)
+            new("session_id", session.SessionId)
         };
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -96,11 +91,10 @@ public class AuthController : ControllerBase
         var sessionId = User.FindFirst("session_id")?.Value;
         if (!string.IsNullOrEmpty(sessionId))
         {
-            _sessionStore.InvalidateSession(sessionId);
+            await _authService.InvalidateSessionAsync(sessionId);
         }
 
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return Redirect("/");
     }
 }
-

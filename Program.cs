@@ -1,4 +1,6 @@
 using Digital_Fridge.Components;
+using Digital_Fridge.Data;
+using Digital_Fridge.Repositories;
 using Digital_Fridge.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -11,6 +13,15 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddControllers();
 
+// Database & Persistence Layer
+builder.Services.AddPostgresDbContext(builder.Configuration);
+builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+
+// Core Business Services Layer
+builder.Services.AddScoped<IRecipeService, RecipeService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options => {
         options.Cookie.Name = "DigitalFridge.Auth";
@@ -20,9 +31,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.SlidingExpiration = true;
         options.Events = new CookieAuthenticationEvents {
             OnValidatePrincipal = async context => {
-                var sessionStore = context.HttpContext.RequestServices.GetRequiredService<ISessionStore>();
+                var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
                 var sessionId = context.Principal?.FindFirst("session_id")?.Value;
-                if (string.IsNullOrEmpty(sessionId) || !sessionStore.IsSessionValid(sessionId))
+                if (string.IsNullOrEmpty(sessionId) || !await authService.ValidateSessionAsync(sessionId))
                 {
                     context.RejectPrincipal();
                     await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -33,8 +44,6 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddSingleton<ISessionStore, InMemorySessionStore>();
-builder.Services.AddSingleton<IRecipeService, InMemoryRecipeService>();
 
 var app = builder.Build();
 
@@ -56,5 +65,16 @@ app.MapStaticAssets();
 app.MapControllers();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+// Seed initial recipes & ensure DB schema
+try
+{
+    await DbInitializer.InitializeDatabaseAsync(app.Services);
+}
+catch (Exception ex)
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogWarning(ex, "Could not initialize database on startup. Ensure PostgreSQL credentials are configured.");
+}
 
 app.Run();
