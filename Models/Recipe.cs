@@ -20,9 +20,10 @@ public class Recipe
     [MaxLength(1000)]
     public string? ImageUrl { get; set; }
 
-    public bool IsPublic { get; set; } = true;
+    public bool IsPublic { get; set; } = false;
 
     public Guid? CreatedByUserId { get; set; }
+    public User? CreatedByUser { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
@@ -31,4 +32,5 @@ public class Recipe
     public int Servings { get; set; }
 
     public List<RecipeIngredient> Ingredients { get; set; } = [];
+    public List<SavedRecipe> SavedBy { get; set; } = [];
 }
