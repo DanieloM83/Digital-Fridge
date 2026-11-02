@@ -36,7 +36,7 @@ public class RecipeService : IRecipeService
             .Where(r =>
                 terms.Any(term => r.Title.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
                 (r.ShortDescription != null && terms.Any(term => r.ShortDescription.Contains(term, StringComparison.OrdinalIgnoreCase))) ||
-                r.Ingredients.Any(i => terms.Any(term => i.Name.Contains(term, StringComparison.OrdinalIgnoreCase)))
+                r.Ingredients.Any(i => i.Product != null && terms.Any(term => i.Product.Name.Contains(term, StringComparison.OrdinalIgnoreCase)))
             )
             .ToList();
     }
@@ -46,4 +46,3 @@ public class RecipeService : IRecipeService
         return await _recipeRepository.GetByIdAsync(recipeId);
     }
 }
-

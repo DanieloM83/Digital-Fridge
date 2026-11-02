@@ -19,6 +19,7 @@ public class RecipeRepository : IRecipeRepository
         return await context.Recipes
             .AsNoTracking()
             .Include(r => r.Ingredients)
+                .ThenInclude(ri => ri.Product)
             .Where(r => r.IsPublic)
             .OrderByDescending(r => r.CreatedAt)
             .ToListAsync();
@@ -30,6 +31,7 @@ public class RecipeRepository : IRecipeRepository
         return await context.Recipes
             .AsNoTracking()
             .Include(r => r.Ingredients)
+                .ThenInclude(ri => ri.Product)
             .FirstOrDefaultAsync(r => r.RecipeId == recipeId);
     }
 
@@ -72,4 +74,3 @@ public class RecipeRepository : IRecipeRepository
         await context.SaveChangesAsync();
     }
 }
-

@@ -1,5 +1,5 @@
 using Digital_Fridge.Models;
-using Digital_Fridge.Repositories;
+using Digital_Fridge.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Digital_Fridge.Data;
@@ -12,17 +12,76 @@ public static class DbInitializer
         var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AppDbContext>>();
         await using var context = await contextFactory.CreateDbContextAsync();
 
-        // Ensure database and schema are created (can be replaced by MigrateAsync when migrations are generated)
-        await context.Database.EnsureCreatedAsync();
+        // Apply all pending migrations and create __EFMigrationsHistory
+        await context.Database.MigrateAsync();
 
-        var recipeRepository = scope.ServiceProvider.GetRequiredService<IRecipeRepository>();
-        if (!await recipeRepository.AnyAsync())
+        if (!await context.ProductCategories.AnyAsync())
         {
-            await SeedInitialRecipesAsync(recipeRepository);
+            await SeedCategoriesAndProductsAsync(context);
+        }
+
+        if (!await context.Recipes.AnyAsync())
+        {
+            await SeedInitialRecipesAsync(context);
         }
     }
 
-    private static async Task SeedInitialRecipesAsync(IRecipeRepository repository)
+    private static async Task SeedCategoriesAndProductsAsync(AppDbContext context)
+    {
+        var produce = new ProductCategory { Name = "Produce", IconUrl = "bi-flower1" };
+        var dairy = new ProductCategory { Name = "Dairy & Eggs", IconUrl = "bi-egg" };
+        var meat = new ProductCategory { Name = "Meat & Poultry", IconUrl = "bi-cup-straw" };
+        var pantry = new ProductCategory { Name = "Pantry & Grains", IconUrl = "bi-basket" };
+        var bakery = new ProductCategory { Name = "Bakery", IconUrl = "bi-bag" };
+        var condiments = new ProductCategory { Name = "Condiments & Spices", IconUrl = "bi-droplet" };
+        var beverages = new ProductCategory { Name = "Beverages", IconUrl = "bi-cup-hot" };
+
+        await context.ProductCategories.AddRangeAsync(produce, dairy, meat, pantry, bakery, condiments, beverages);
+        await context.SaveChangesAsync();
+
+        var products = new List<Product>
+        {
+            // Dairy & Eggs
+            new() { ProductId = Guid.Parse("a0000000-0000-0000-0000-000000000001"), Name = "Eggs", CategoryId = dairy.CategoryId, DefaultUnit = UnitEnum.Pieces, ProcessingLevel = ProcessingLevel.Raw },
+            new() { ProductId = Guid.Parse("a0000000-0000-0000-0000-000000000002"), Name = "Feta Cheese", CategoryId = dairy.CategoryId, DefaultUnit = UnitEnum.Grams, ProcessingLevel = ProcessingLevel.Processed },
+            new() { ProductId = Guid.Parse("a0000000-0000-0000-0000-000000000003"), Name = "Heavy Cream", CategoryId = dairy.CategoryId, DefaultUnit = UnitEnum.Milliliters, ProcessingLevel = ProcessingLevel.Processed },
+            new() { ProductId = Guid.Parse("a0000000-0000-0000-0000-000000000004"), Name = "Parmesan", CategoryId = dairy.CategoryId, DefaultUnit = UnitEnum.Grams, ProcessingLevel = ProcessingLevel.Processed },
+            new() { ProductId = Guid.Parse("a0000000-0000-0000-0000-000000000005"), Name = "Butter", CategoryId = dairy.CategoryId, DefaultUnit = UnitEnum.Grams, ProcessingLevel = ProcessingLevel.Processed },
+
+            // Produce
+            new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000001"), Name = "Ripe Tomatoes", CategoryId = produce.CategoryId, DefaultUnit = UnitEnum.Grams, ProcessingLevel = ProcessingLevel.Raw },
+            new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000002"), Name = "Bell Pepper", CategoryId = produce.CategoryId, DefaultUnit = UnitEnum.Pieces, ProcessingLevel = ProcessingLevel.Raw },
+            new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000003"), Name = "Garlic", CategoryId = produce.CategoryId, DefaultUnit = UnitEnum.Cloves, ProcessingLevel = ProcessingLevel.Raw },
+            new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000004"), Name = "Fresh Basil", CategoryId = produce.CategoryId, DefaultUnit = UnitEnum.Grams, ProcessingLevel = ProcessingLevel.Raw },
+            new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000005"), Name = "Parsley", CategoryId = produce.CategoryId, DefaultUnit = UnitEnum.Grams, ProcessingLevel = ProcessingLevel.Raw },
+            new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000006"), Name = "Sweet Corn", CategoryId = produce.CategoryId, DefaultUnit = UnitEnum.Pieces, ProcessingLevel = ProcessingLevel.Raw },
+            new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000007"), Name = "Avocado", CategoryId = produce.CategoryId, DefaultUnit = UnitEnum.Pieces, ProcessingLevel = ProcessingLevel.Raw },
+            new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000008"), Name = "Red Onion", CategoryId = produce.CategoryId, DefaultUnit = UnitEnum.Pieces, ProcessingLevel = ProcessingLevel.Raw },
+            new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000009"), Name = "Lime", CategoryId = produce.CategoryId, DefaultUnit = UnitEnum.Pieces, ProcessingLevel = ProcessingLevel.Raw },
+            new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000010"), Name = "Cilantro", CategoryId = produce.CategoryId, DefaultUnit = UnitEnum.Grams, ProcessingLevel = ProcessingLevel.Raw },
+            new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000011"), Name = "Lemon", CategoryId = produce.CategoryId, DefaultUnit = UnitEnum.Pieces, ProcessingLevel = ProcessingLevel.Raw },
+            new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000012"), Name = "Rosemary", CategoryId = produce.CategoryId, DefaultUnit = UnitEnum.Sprigs, ProcessingLevel = ProcessingLevel.Raw },
+            new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000013"), Name = "Thyme", CategoryId = produce.CategoryId, DefaultUnit = UnitEnum.Sprigs, ProcessingLevel = ProcessingLevel.Raw },
+            new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000014"), Name = "Sweet Potato", CategoryId = produce.CategoryId, DefaultUnit = UnitEnum.Pieces, ProcessingLevel = ProcessingLevel.Raw },
+            new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000015"), Name = "Broccoli", CategoryId = produce.CategoryId, DefaultUnit = UnitEnum.Grams, ProcessingLevel = ProcessingLevel.Raw },
+            new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000016"), Name = "Fresh Chives", CategoryId = produce.CategoryId, DefaultUnit = UnitEnum.Grams, ProcessingLevel = ProcessingLevel.Raw },
+
+            // Meat & Poultry
+            new() { ProductId = Guid.Parse("c0000000-0000-0000-0000-000000000001"), Name = "Chicken Breast", CategoryId = meat.CategoryId, DefaultUnit = UnitEnum.Grams, ProcessingLevel = ProcessingLevel.Raw },
+
+            // Pantry & Grains
+            new() { ProductId = Guid.Parse("d0000000-0000-0000-0000-000000000001"), Name = "Fettuccine", CategoryId = pantry.CategoryId, DefaultUnit = UnitEnum.Grams, ProcessingLevel = ProcessingLevel.Processed },
+            new() { ProductId = Guid.Parse("d0000000-0000-0000-0000-000000000002"), Name = "Olive Oil", CategoryId = condiments.CategoryId, DefaultUnit = UnitEnum.Milliliters, ProcessingLevel = ProcessingLevel.Processed },
+            new() { ProductId = Guid.Parse("d0000000-0000-0000-0000-000000000003"), Name = "Quinoa", CategoryId = pantry.CategoryId, DefaultUnit = UnitEnum.Grams, ProcessingLevel = ProcessingLevel.Raw },
+            new() { ProductId = Guid.Parse("d0000000-0000-0000-0000-000000000004"), Name = "Tahini", CategoryId = condiments.CategoryId, DefaultUnit = UnitEnum.Grams, ProcessingLevel = ProcessingLevel.Processed },
+            new() { ProductId = Guid.Parse("d0000000-0000-0000-0000-000000000005"), Name = "Black Pepper", CategoryId = condiments.CategoryId, DefaultUnit = UnitEnum.Pinch, ProcessingLevel = ProcessingLevel.Raw }
+        };
+
+        await context.Products.AddRangeAsync(products);
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task SeedInitialRecipesAsync(AppDbContext context)
     {
         var recipes = new List<Recipe>
         {
@@ -39,12 +98,12 @@ public static class DbInitializer
                 CreatedAt = DateTime.UtcNow.AddDays(-2),
                 Ingredients =
                 [
-                    new() { Name = "Eggs", Quantity = 4, Unit = "pcs" },
-                    new() { Name = "Ripe Tomatoes", Quantity = 400, Unit = "g" },
-                    new() { Name = "Bell Pepper", Quantity = 1, Unit = "pcs" },
-                    new() { Name = "Garlic", Quantity = 3, Unit = "cloves" },
-                    new() { Name = "Fresh Basil", Quantity = 15, Unit = "g" },
-                    new() { Name = "Feta Cheese", Quantity = 60, Unit = "g", IsOptional = true }
+                    new() { ProductId = Guid.Parse("a0000000-0000-0000-0000-000000000001"), Quantity = 4, Unit = UnitEnum.Pieces },
+                    new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000001"), Quantity = 400, Unit = UnitEnum.Grams },
+                    new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000002"), Quantity = 1, Unit = UnitEnum.Pieces },
+                    new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000003"), Quantity = 3, Unit = UnitEnum.Cloves },
+                    new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000004"), Quantity = 15, Unit = UnitEnum.Grams },
+                    new() { ProductId = Guid.Parse("a0000000-0000-0000-0000-000000000002"), Quantity = 60, Unit = UnitEnum.Grams, IsOptional = true }
                 ]
             },
             new()
@@ -60,12 +119,12 @@ public static class DbInitializer
                 CreatedAt = DateTime.UtcNow.AddDays(-5),
                 Ingredients =
                 [
-                    new() { Name = "Fettuccine", Quantity = 350, Unit = "g" },
-                    new() { Name = "Heavy Cream", Quantity = 200, Unit = "ml" },
-                    new() { Name = "Parmesan", Quantity = 90, Unit = "g" },
-                    new() { Name = "Garlic", Quantity = 4, Unit = "cloves" },
-                    new() { Name = "Butter", Quantity = 30, Unit = "g" },
-                    new() { Name = "Parsley", Quantity = 10, Unit = "g", IsOptional = true }
+                    new() { ProductId = Guid.Parse("d0000000-0000-0000-0000-000000000001"), Quantity = 350, Unit = UnitEnum.Grams },
+                    new() { ProductId = Guid.Parse("a0000000-0000-0000-0000-000000000003"), Quantity = 200, Unit = UnitEnum.Milliliters },
+                    new() { ProductId = Guid.Parse("a0000000-0000-0000-0000-000000000004"), Quantity = 90, Unit = UnitEnum.Grams },
+                    new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000003"), Quantity = 4, Unit = UnitEnum.Cloves },
+                    new() { ProductId = Guid.Parse("a0000000-0000-0000-0000-000000000005"), Quantity = 30, Unit = UnitEnum.Grams },
+                    new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000005"), Quantity = 10, Unit = UnitEnum.Grams, IsOptional = true }
                 ]
             },
             new()
@@ -81,12 +140,12 @@ public static class DbInitializer
                 CreatedAt = DateTime.UtcNow.AddDays(-7),
                 Ingredients =
                 [
-                    new() { Name = "Sweet Corn", Quantity = 2, Unit = "ears" },
-                    new() { Name = "Avocado", Quantity = 2, Unit = "pcs" },
-                    new() { Name = "Red Onion", Quantity = 0.5m, Unit = "pcs" },
-                    new() { Name = "Lime", Quantity = 1, Unit = "pcs" },
-                    new() { Name = "Cilantro", Quantity = 15, Unit = "g" },
-                    new() { Name = "Olive Oil", Quantity = 20, Unit = "ml" }
+                    new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000006"), Quantity = 2, Unit = UnitEnum.Pieces },
+                    new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000007"), Quantity = 2, Unit = UnitEnum.Pieces },
+                    new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000008"), Quantity = 0.5m, Unit = UnitEnum.Pieces },
+                    new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000009"), Quantity = 1, Unit = UnitEnum.Pieces },
+                    new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000010"), Quantity = 15, Unit = UnitEnum.Grams },
+                    new() { ProductId = Guid.Parse("d0000000-0000-0000-0000-000000000002"), Quantity = 20, Unit = UnitEnum.Milliliters }
                 ]
             },
             new()
@@ -102,12 +161,12 @@ public static class DbInitializer
                 CreatedAt = DateTime.UtcNow.AddDays(-10),
                 Ingredients =
                 [
-                    new() { Name = "Chicken Breast", Quantity = 600, Unit = "g" },
-                    new() { Name = "Lemon", Quantity = 1, Unit = "pcs" },
-                    new() { Name = "Rosemary", Quantity = 2, Unit = "sprigs" },
-                    new() { Name = "Thyme", Quantity = 3, Unit = "sprigs" },
-                    new() { Name = "Garlic", Quantity = 4, Unit = "cloves" },
-                    new() { Name = "Butter", Quantity = 25, Unit = "g" }
+                    new() { ProductId = Guid.Parse("c0000000-0000-0000-0000-000000000001"), Quantity = 600, Unit = UnitEnum.Grams },
+                    new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000011"), Quantity = 1, Unit = UnitEnum.Pieces },
+                    new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000012"), Quantity = 2, Unit = UnitEnum.Sprigs },
+                    new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000013"), Quantity = 3, Unit = UnitEnum.Sprigs },
+                    new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000003"), Quantity = 4, Unit = UnitEnum.Cloves },
+                    new() { ProductId = Guid.Parse("a0000000-0000-0000-0000-000000000005"), Quantity = 25, Unit = UnitEnum.Grams }
                 ]
             },
             new()
@@ -123,11 +182,11 @@ public static class DbInitializer
                 CreatedAt = DateTime.UtcNow.AddDays(-12),
                 Ingredients =
                 [
-                    new() { Name = "Quinoa", Quantity = 150, Unit = "g" },
-                    new() { Name = "Sweet Potato", Quantity = 1, Unit = "pcs" },
-                    new() { Name = "Broccoli", Quantity = 200, Unit = "g" },
-                    new() { Name = "Tahini", Quantity = 40, Unit = "g" },
-                    new() { Name = "Olive Oil", Quantity = 15, Unit = "ml" }
+                    new() { ProductId = Guid.Parse("d0000000-0000-0000-0000-000000000003"), Quantity = 150, Unit = UnitEnum.Grams },
+                    new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000014"), Quantity = 1, Unit = UnitEnum.Pieces },
+                    new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000015"), Quantity = 200, Unit = UnitEnum.Grams },
+                    new() { ProductId = Guid.Parse("d0000000-0000-0000-0000-000000000004"), Quantity = 40, Unit = UnitEnum.Grams },
+                    new() { ProductId = Guid.Parse("d0000000-0000-0000-0000-000000000002"), Quantity = 15, Unit = UnitEnum.Milliliters }
                 ]
             },
             new()
@@ -143,15 +202,15 @@ public static class DbInitializer
                 CreatedAt = DateTime.UtcNow.AddDays(-14),
                 Ingredients =
                 [
-                    new() { Name = "Eggs", Quantity = 3, Unit = "pcs" },
-                    new() { Name = "Butter", Quantity = 20, Unit = "g" },
-                    new() { Name = "Fresh Chives", Quantity = 10, Unit = "g" },
-                    new() { Name = "Black Pepper", Quantity = 1, Unit = "pinch", IsOptional = true }
+                    new() { ProductId = Guid.Parse("a0000000-0000-0000-0000-000000000001"), Quantity = 3, Unit = UnitEnum.Pieces },
+                    new() { ProductId = Guid.Parse("a0000000-0000-0000-0000-000000000005"), Quantity = 20, Unit = UnitEnum.Grams },
+                    new() { ProductId = Guid.Parse("b0000000-0000-0000-0000-000000000016"), Quantity = 10, Unit = UnitEnum.Grams },
+                    new() { ProductId = Guid.Parse("d0000000-0000-0000-0000-000000000005"), Quantity = 1, Unit = UnitEnum.Pinch, IsOptional = true }
                 ]
             }
         };
 
-        await repository.AddRangeAsync(recipes);
+        await context.Recipes.AddRangeAsync(recipes);
+        await context.SaveChangesAsync();
     }
 }
-

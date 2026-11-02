@@ -54,7 +54,7 @@ public class AuthController : ControllerBase
             return Unauthorized("Invalid token.");
         }
 
-        var session = await _authService.CreateUserSessionAsync(
+        var (user, session) = await _authService.ProcessGoogleLoginAsync(
             payload.Subject,
             payload.Email,
             payload.Name,
@@ -63,10 +63,12 @@ public class AuthController : ControllerBase
 
         var claims = new List<Claim>
         {
-            new(ClaimTypes.NameIdentifier, payload.Subject),
-            new(ClaimTypes.Name, payload.Name ?? payload.Email),
-            new(ClaimTypes.Email, payload.Email),
-            new("picture", payload.Picture ?? string.Empty),
+            new(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+            new(ClaimTypes.Name, user.FullName ?? user.Email),
+            new(ClaimTypes.Email, user.Email),
+            new(ClaimTypes.Role, user.Role.ToString()),
+            new("family_id", user.FamilyId.ToString()),
+            new("picture", user.AvatarUrl ?? string.Empty),
             new("session_id", session.SessionId)
         };
 
@@ -91,7 +93,7 @@ public class AuthController : ControllerBase
         var sessionId = User.FindFirst("session_id")?.Value;
         if (!string.IsNullOrEmpty(sessionId))
         {
-            await _authService.InvalidateSessionAsync(sessionId);
+            await _authService.RevokeSessionAsync(sessionId);
         }
 
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);

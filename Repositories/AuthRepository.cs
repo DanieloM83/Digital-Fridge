@@ -13,28 +13,63 @@ public class AuthRepository : IAuthRepository
         _contextFactory = contextFactory;
     }
 
-    public async Task CreateSessionAsync(UserSession session)
+    public async Task<User?> GetUserByGoogleIdAsync(string googleId)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
-        context.UserSessions.Add(session);
+        return await context.Users
+            .AsNoTracking()
+            .Include(u => u.Family)
+            .FirstOrDefaultAsync(u => u.GoogleId == googleId);
+    }
+
+    public async Task<User?> GetUserByIdAsync(Guid userId)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        return await context.Users
+            .AsNoTracking()
+            .Include(u => u.Family)
+            .FirstOrDefaultAsync(u => u.UserId == userId);
+    }
+
+    public async Task CreateUserWithFamilyAsync(User user, Family family)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        await context.Families.AddAsync(family);
+        await context.Users.AddAsync(user);
         await context.SaveChangesAsync();
     }
 
-    public async Task<UserSession?> GetSessionByIdAsync(string sessionId)
+    public async Task UpdateUserAsync(User user)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        context.Users.Update(user);
+        await context.SaveChangesAsync();
+    }
+
+    public async Task CreateSessionAsync(UserSession session)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        await context.UserSessions.AddAsync(session);
+        await context.SaveChangesAsync();
+    }
+
+    public async Task<UserSession?> GetSessionWithUserAsync(string sessionId)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
         return await context.UserSessions
             .AsNoTracking()
+            .Include(s => s.User)
+                .ThenInclude(u => u!.Family)
             .FirstOrDefaultAsync(s => s.SessionId == sessionId);
     }
 
-    public async Task InvalidateSessionAsync(string sessionId)
+    public async Task RevokeSessionAsync(string sessionId)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
-        var session = await context.UserSessions.FindAsync(sessionId);
+        var session = await context.UserSessions.FirstOrDefaultAsync(s => s.SessionId == sessionId);
         if (session != null)
         {
-            context.UserSessions.Remove(session);
+            session.IsRevoked = true;
             await context.SaveChangesAsync();
         }
     }
@@ -44,8 +79,7 @@ public class AuthRepository : IAuthRepository
         await using var context = await _contextFactory.CreateDbContextAsync();
         var now = DateTime.UtcNow;
         await context.UserSessions
-            .Where(s => s.ExpiresAtUtc <= now)
+            .Where(s => s.ExpiresAtUtc <= now || s.IsRevoked)
             .ExecuteDeleteAsync();
     }
 }
-

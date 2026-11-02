@@ -12,4 +12,3 @@ public interface IRecipeRepository
     Task<bool> AnyAsync();
     Task AddRangeAsync(IEnumerable<Recipe> recipes);
 }
-
