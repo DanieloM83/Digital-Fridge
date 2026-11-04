@@ -26,8 +26,7 @@ public class AppDbContext : DbContext
         // ------------------------------------------
         // Household & Identity Domain
         // ------------------------------------------
-        modelBuilder.Entity<Family>(entity =>
-        {
+        modelBuilder.Entity<Family>(entity => {
             entity.HasMany(f => f.Members)
                   .WithOne(u => u.Family)
                   .HasForeignKey(u => u.FamilyId)
@@ -44,8 +43,7 @@ public class AppDbContext : DbContext
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
-        modelBuilder.Entity<User>(entity =>
-        {
+        modelBuilder.Entity<User>(entity => {
             entity.HasIndex(u => u.GoogleId).IsUnique();
             entity.HasIndex(u => u.Email);
 
@@ -68,8 +66,7 @@ public class AppDbContext : DbContext
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
-        modelBuilder.Entity<UserSession>(entity =>
-        {
+        modelBuilder.Entity<UserSession>(entity => {
             entity.HasIndex(s => s.UserId);
             entity.HasIndex(s => s.ExpiresAtUtc);
             entity.HasIndex(s => s.IsRevoked);
@@ -78,8 +75,7 @@ public class AppDbContext : DbContext
         // ------------------------------------------
         // Product Taxonomy & Inventory Domain
         // ------------------------------------------
-        modelBuilder.Entity<ProductCategory>(entity =>
-        {
+        modelBuilder.Entity<ProductCategory>(entity => {
             entity.HasIndex(pc => pc.Name).IsUnique();
 
             entity.HasMany(pc => pc.Products)
@@ -88,8 +84,7 @@ public class AppDbContext : DbContext
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        modelBuilder.Entity<Product>(entity =>
-        {
+        modelBuilder.Entity<Product>(entity => {
             entity.HasIndex(p => p.Barcode);
             entity.HasIndex(p => p.Name);
 
@@ -110,8 +105,7 @@ public class AppDbContext : DbContext
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        modelBuilder.Entity<FridgeItem>(entity =>
-        {
+        modelBuilder.Entity<FridgeItem>(entity => {
             entity.Property(fi => fi.Quantity)
                   .HasPrecision(8, 2);
 
@@ -125,8 +119,7 @@ public class AppDbContext : DbContext
         // ------------------------------------------
         // Recipe & Curation Domain
         // ------------------------------------------
-        modelBuilder.Entity<Recipe>(entity =>
-        {
+        modelBuilder.Entity<Recipe>(entity => {
             entity.HasIndex(r => r.IsPublic);
             entity.HasIndex(r => r.Title);
 
@@ -141,8 +134,7 @@ public class AppDbContext : DbContext
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
-        modelBuilder.Entity<RecipeIngredient>(entity =>
-        {
+        modelBuilder.Entity<RecipeIngredient>(entity => {
             entity.HasKey(ri => new { ri.RecipeId, ri.ProductId });
 
             entity.Property(ri => ri.Quantity)
@@ -152,8 +144,7 @@ public class AppDbContext : DbContext
                   .HasConversion<string>();
         });
 
-        modelBuilder.Entity<SavedRecipe>(entity =>
-        {
+        modelBuilder.Entity<SavedRecipe>(entity => {
             entity.HasIndex(sr => new { sr.RecipeId, sr.UserId });
             entity.HasIndex(sr => new { sr.RecipeId, sr.FamilyId });
         });
