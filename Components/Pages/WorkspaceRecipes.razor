@@ -1,14 +1,171 @@
+@*
+    WorkspaceRecipes - Displays saved recipes for the authenticated user,
+    with an interactive toggle between Personal and Family collections.
+*@
+
 @page "/workspace/recipes"
 @layout WorkspaceLayout
 @attribute [Authorize]
+@rendermode InteractiveServer
+
+@inject IRecipeService RecipeService
+@inject IAuthRepository AuthRepository
+@inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Saved Recipes - Workspace</PageTitle>
 
-<div class="container-fluid flex-grow-1 d-flex flex-column align-items-center justify-content-center text-white p-4">
-    <div class="text-center">
-        <i class="bi bi-book text-accent display-4 mb-3 d-block" aria-hidden="true"></i>
-        <h2 class="fw-bold mb-2">My Recipes</h2>
-        <p class="text-white-50">View your private bookmarks and family shared recipe collections.</p>
-    </div>
-</div>
+<section class="workspace-recipes-page py-4">
+    <div class="container pt-2 pb-5">
 
+        @* Header Section: Title, Subtitle, Scope Toggle, and Search *@
+        <div class="text-center text-white mb-5 mx-auto recipes-header-section">
+            <h1 class="recipes-title fw-bold mb-3">
+                Saved Recipes
+            </h1>
+            <p class="recipes-subtitle lead mb-4 mx-auto">
+                @(currentScope == RecipeScope.Personal
+                    ? "Your private bookmarks and personalized culinary discoveries."
+                    : "Recipes shared and saved across your household family.")
+            </p>
+
+            @* Scope Toggle: Personal / Family *@
+            <div class="scope-toggle-container d-inline-flex p-1 mb-4">
+                <button type="button"
+                        class="btn scope-toggle-btn @(currentScope == RecipeScope.Personal ? "active" : "")"
+                        @onclick="() => SwitchScopeAsync(RecipeScope.Personal)">
+                    <i class="bi bi-person me-1" aria-hidden="true"></i>Personal
+                </button>
+                <button type="button"
+                        class="btn scope-toggle-btn @(currentScope == RecipeScope.Family ? "active" : "")"
+                        @onclick="() => SwitchScopeAsync(RecipeScope.Family)">
+                    <i class="bi bi-people me-1" aria-hidden="true"></i>Family
+                </button>
+            </div>
+
+            @* Prominent Search Input with Contextual Guidance *@
+            <div class="search-container mx-auto">
+                <SearchInput Value="@searchQuery"
+                             ValueChanged="OnSearchChanged"
+                             Placeholder="Search saved recipes by ingredients or title..."
+                             AriaLabel="Search saved recipes by ingredients or title" />
+                <div class="form-text text-white-50 mt-2 small">
+                    Tip: Enter ingredients separated by commas to filter saved recipes by what you have
+                </div>
+            </div>
+        </div>
+
+        @* Catalog Grid *@
+        @if (recipes == null)
+        {
+            <div class="d-flex justify-content-center py-5">
+                <div class="spinner-border text-light" role="status">
+                    <span class="visually-hidden">Loading recipes...</span>
+                </div>
+            </div>
+        }
+        else if (recipes.Count == 0)
+        {
+            <div class="text-center py-5 text-white empty-state-card mx-auto p-4">
+                <i class="bi @(string.IsNullOrWhiteSpace(searchQuery) ? (currentScope == RecipeScope.Personal ? "bi-bookmark" : "bi-bookmarks") : "bi-search") fs-1 text-accent mb-3 d-block" aria-hidden="true"></i>
+                <h3 class="fw-bold mb-2">
+                    @(string.IsNullOrWhiteSpace(searchQuery)
+                        ? (currentScope == RecipeScope.Personal ? "No personal recipes saved yet" : "No family recipes saved yet")
+                        : "No matching saved recipes found")
+                </h3>
+                <p class="text-white-50 mb-3 small">
+                    @(string.IsNullOrWhiteSpace(searchQuery)
+                        ? "Browse our public recipes collection and bookmark the meals you would love to cook."
+                        : "Try adjusting your search terms or clearing the filter.")
+                </p>
+
+                @if (string.IsNullOrWhiteSpace(searchQuery))
+                {
+                    <a href="/recipes" class="btn btn-accent btn-sm">
+                        <i class="bi bi-book me-1"></i>Discover Public Recipes
+                    </a>
+                }
+                else
+                {
+                    <button class="btn btn-outline-light btn-sm" @onclick="ClearSearch">
+                        Show all @(currentScope == RecipeScope.Personal ? "personal" : "family") recipes
+                    </button>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                @foreach (var recipe in recipes)
+                {
+                    <div class="col" @key="recipe.RecipeId">
+                        <RecipeCard Recipe="recipe" />
+                    </div>
+                }
+            </div>
+        }
+
+    </div>
+</section>
+
+@code {
+    private enum RecipeScope
+    {
+        Personal,
+        Family
+    }
+
+    private RecipeScope currentScope = RecipeScope.Personal;
+    private string searchQuery = string.Empty;
+    private IReadOnlyList<Recipe>? recipes;
+    private User? currentUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var userIdStr = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (Guid.TryParse(userIdStr, out var userId))
+        {
+            currentUser = await AuthRepository.GetUserByIdAsync(userId);
+        }
+
+        await LoadRecipesAsync();
+    }
+
+    private async Task SwitchScopeAsync(RecipeScope newScope)
+    {
+        if (currentScope == newScope) return;
+        currentScope = newScope;
+        await LoadRecipesAsync();
+    }
+
+    private async Task OnSearchChanged(string query)
+    {
+        searchQuery = query;
+        await LoadRecipesAsync();
+    }
+
+    private async Task ClearSearch()
+    {
+        searchQuery = string.Empty;
+        await LoadRecipesAsync();
+    }
+
+    private async Task LoadRecipesAsync()
+    {
+        if (currentUser is null)
+        {
+            recipes = Array.Empty<Recipe>();
+            return;
+        }
+
+        if (currentScope == RecipeScope.Personal)
+        {
+            recipes = await RecipeService.GetSavedRecipesAsync(currentUser.UserId, null, searchQuery);
+        }
+        else
+        {
+            recipes = await RecipeService.GetSavedRecipesAsync(null, currentUser.FamilyId, searchQuery);
+        }
+    }
+}
