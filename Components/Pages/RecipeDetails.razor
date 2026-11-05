@@ -1,0 +1,186 @@
+@*
+    RecipeDetails - Displays full recipe information including image, metadata,
+    ingredients checklist, and step-by-step instructions.
+*@
+
+@page "/recipes/{id:guid}"
+@inject IRecipeService RecipeService
+@inject NavigationManager Nav
+
+<PageTitle>@(_recipe?.Title ?? "Recipe Details") - Digital Web Fridge</PageTitle>
+
+<section class="recipe-details-page py-5">
+    <div class="container pt-4 pb-5">
+
+        @* Top-left Back Navigation *@
+        <div class="mb-4">
+            <a href="/recipes" class="btn btn-outline-light btn-sm d-inline-flex align-items-center gap-2 back-link">
+                <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                <span>Back to Recipes</span>
+            </a>
+        </div>
+
+        @if (_isLoading)
+        {
+            <div class="d-flex justify-content-center align-items-center py-5">
+                <div class="spinner-border text-accent" role="status">
+                    <span class="visually-hidden">Loading recipe...</span>
+                </div>
+            </div>
+        }
+        else if (_recipe is null)
+        {
+            <div class="glass-card text-center text-white p-5 mx-auto not-found-card">
+                <i class="bi bi-exclamation-circle text-accent display-4 mb-3 d-block" aria-hidden="true"></i>
+                <h3 class="fw-bold mb-2">Recipe Not Found</h3>
+                <p class="text-white-50 mb-4">
+                    The recipe you are looking for does not exist or may have been removed.
+                </p>
+                <a href="/recipes" class="btn btn-accent">Browse Public Recipes</a>
+            </div>
+        }
+        else
+        {
+            @* Large Recipe Card *@
+            <div class="glass-card recipe-main-card mx-auto overflow-hidden">
+
+                @* Top Center High-Resolution Image *@
+                @if (!string.IsNullOrEmpty(_recipe.ImageUrl))
+                {
+                    <div class="recipe-hero-image-wrapper">
+                        <img src="@_recipe.ImageUrl" alt="@_recipe.Title" class="recipe-hero-image" />
+                    </div>
+                }
+
+                <div class="p-4 p-md-5">
+                    @* Title & Short Description *@
+                    <h1 class="recipe-title fw-bold text-white mb-2">@_recipe.Title</h1>
+
+                    @if (!string.IsNullOrWhiteSpace(_recipe.ShortDescription))
+                    {
+                        <p class="recipe-description text-white-50 lead mb-4">
+                            @_recipe.ShortDescription
+                        </p>
+                    }
+
+                    @* Meta Fields Row: CreatedAt, PrepTimeMinutes, Servings *@
+                    <div class="d-flex flex-wrap align-items-center gap-4 py-3 meta-row mb-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-calendar3 text-accent fs-5" aria-hidden="true"></i>
+                            <div>
+                                <span class="d-block small text-white-50">Added</span>
+                                <span class="text-white fw-medium">@_recipe.CreatedAt.ToString("MMM d, yyyy")</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-clock text-accent fs-5" aria-hidden="true"></i>
+                            <div>
+                                <span class="d-block small text-white-50">Prep Time</span>
+                                <span class="text-white fw-medium">@_recipe.PrepTimeMinutes mins</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-people text-accent fs-5" aria-hidden="true"></i>
+                            <div>
+                                <span class="d-block small text-white-50">Yields</span>
+                                <span class="text-white fw-medium">@_recipe.Servings @(_recipe.Servings == 1 ? "serving" :
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "servings")</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        @* Two Columns: Ingredients (left) & Instructions (right) *@
+                        <div class="row g-4 g-lg-5">
+                            @* Left Column: Ingredients *@
+                            <div class="col-12 col-md-5 col-lg-4">
+                                <div class="ingredients-section">
+                                    <h4 class="text-white fw-bold mb-3 d-flex align-items-center gap-2">
+                                        <i class="bi bi-basket text-accent" aria-hidden="true"></i>
+                                        <span>Ingredients</span>
+                                    </h4>
+
+                                    @if (_recipe.Ingredients.Count == 0)
+                                    {
+                                        <p class="text-white-50 small mb-0">No ingredients specified.</p>
+                                    }
+                                    else
+                                    {
+                                        <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
+                                            @foreach (var item in _recipe.Ingredients)
+                                            {
+                                                <li
+                                                    class="ingredient-row d-flex align-items-center justify-content-between p-2 rounded">
+                                                    <span class="text-white">
+                                                        @(string.IsNullOrEmpty(item.Name) ? (item.Product?.Name ?? "Item") : item.Name)
+                                                        @if (item.IsOptional)
+                                                        {
+                                                            <span class="badge bg-secondary ms-1 small">optional</span>
+                                                        }
+                                                    </span>
+                                                    <span class="text-accent fw-semibold text-nowrap ms-2">
+                                                        @FormatQuantity(item.Quantity) @FormatUnit(item.Unit)
+                                                    </span>
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                </div>
+                            </div>
+
+                            @* Right Column: Instructions *@
+                            <div class="col-12 col-md-7 col-lg-8">
+                                <div class="instructions-section">
+                                    <h4 class="text-white fw-bold mb-3 d-flex align-items-center gap-2">
+                                        <i class="bi bi-journal-text text-accent" aria-hidden="true"></i>
+                                        <span>Instructions</span>
+                                    </h4>
+
+                                    <div class="instructions-content text-white-75">
+                                        @_recipe.Instructions
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            }
+
+        </div>
+    </section>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private Recipe? _recipe;
+    private bool _isLoading = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _isLoading = true;
+        _recipe = await RecipeService.GetRecipeByIdAsync(Id);
+        _isLoading = false;
+    }
+
+    private static string FormatQuantity(decimal qty)
+    {
+        return qty % 1 == 0 ? ((int)qty).ToString() : qty.ToString("0.##");
+    }
+
+    private static string FormatUnit(UnitEnum unit) => unit switch {
+        UnitEnum.Grams => "g",
+        UnitEnum.Milliliters => "ml",
+        UnitEnum.Pieces => "pcs",
+        UnitEnum.Cloves => "cloves",
+        UnitEnum.Sprigs => "sprigs",
+        UnitEnum.Pinch => "pinch",
+        UnitEnum.Tablespoons => "tbsp",
+        UnitEnum.Teaspoons => "tsp",
+        UnitEnum.Cups => "cups",
+        _ => unit.ToString().ToLowerInvariant()
+    };
+}
+
