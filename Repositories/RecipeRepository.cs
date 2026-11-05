@@ -96,8 +96,7 @@ public class RecipeRepository : IRecipeRepository
             return false;
         }
 
-        var saved = new SavedRecipe
-        {
+        var saved = new SavedRecipe {
             RecipeId = recipeId,
             UserId = userId,
             SavedAt = DateTime.UtcNow
@@ -118,8 +117,7 @@ public class RecipeRepository : IRecipeRepository
             return false;
         }
 
-        var saved = new SavedRecipe
-        {
+        var saved = new SavedRecipe {
             RecipeId = recipeId,
             FamilyId = familyId,
             SavedAt = DateTime.UtcNow
