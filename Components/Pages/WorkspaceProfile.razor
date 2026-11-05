@@ -1,6 +1,6 @@
 @*
-    WorkspaceProfile - User profile, family management, and member list.
-    Interactive server component: loads user+family from DB, handles join/leave/kick actions.
+    WorkspaceProfile - User profile and family management.
+    Handles user state, joining, and leaving families.
 *@
 
 @page "/workspace/profile"
@@ -11,8 +11,6 @@
 @inject IAuthRepository AuthRepository
 @inject IFamilyService FamilyService
 @inject AuthenticationStateProvider AuthStateProvider
-@inject NavigationManager Nav
-@inject IJSRuntime JS
 
 <PageTitle>Profile - Workspace</PageTitle>
 
@@ -43,7 +41,7 @@ else
         @* 2. Family ID + Leave  *@
         <div class="glass-card p-4 d-flex align-items-center gap-3 flex-wrap">
             <div class="flex-grow-1">
-                <span class="text-white small text-uppercase tracking-wide">@_family.Name</span>
+                <span class="text-white small text-uppercase tracking-wide">@(_family?.Name ?? "Family")</span>
                 <div class="d-flex align-items-center gap-2 mt-1">
                     <code class="family-id-code" title="@_user.FamilyId.ToString()">
                         @_user.FamilyId.ToString()[..8]…
@@ -93,151 +91,41 @@ else
         @* 4. Family members grid *@
         @if (_family is not null)
         {
-            <div class="glass-card p-4">
-                <h6 class="text-white-50 small text-uppercase mb-3">
-                    Family members (@_family.Members.Count)
-                </h6>
-                <div class="table-responsive">
-                    <table class="table table-dark table-hover members-table mb-0">
-                        <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Role</th>
-                                <th>Joined</th>
-                                @if (_user.Role == UserRole.FamilyHead)
-                                {
-                                    <th>Action</th>
-                                }
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var member in _family.Members.OrderBy(m => m.CreatedAt))
-                            {
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <img src="@member.AvatarUrl" alt=""
-                                                 class="member-avatar" />
-                                            <span class="text-white">
-                                                @(member.FullName ?? member.Email)
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="badge @RoleBadgeClass(member.Role)">
-                                            @GetRoleLabel(member.Role)
-                                        </span>
-                                    </td>
-                                    <td class="text-white-50 small align-middle">
-                                        @member.JoinedAt.ToLocalTime().ToString("MMM d, yyyy")
-                                    </td>
-                                    @if (_user.Role == UserRole.FamilyHead)
-                                    {
-                                        <td>
-                                            @if (member.UserId != _user.UserId)
-                                            {
-                                                <button class="btn btn-outline-danger btn-sm"
-                                                        @onclick="() => OpenKickModal(member)">
-                                                    <i class="bi bi-person-x me-1" aria-hidden="true"></i>Kick
-                                                </button>
-                                            }
-                                        </td>
-                                    }
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <FamilyMembersGrid Family="_family"
+                               CurrentUserId="_user.UserId"
+                               IsHead="_user.Role == UserRole.FamilyHead"
+                               OnFamilyUpdated="ReloadUserDataAsync" />
         }
     </div>
 
-    @* Modals *@
+    @* Confirmation Modals *@
+    <ConfirmationModal Id="joinModal"
+                       Title="Are you sure?"
+                       Icon="bi-people"
+                       ConfirmText="Proceed"
+                       ConfirmButtonClass="btn-accent"
+                       OnConfirm="JoinFamilyAsync">
+        <p class="mb-0">
+            Your personal recipes remain yours, but storage and family recipes will be
+            updated with the new family's content.
+            @if (_user.Role == UserRole.FamilyHead)
+            {
+                <span> All your family members will be moved to the new family with you.</span>
+            }
+        </p>
+    </ConfirmationModal>
 
-    @* Join confirmation *@
-    <div class="modal fade" id="joinModal" tabindex="-1" aria-labelledby="joinModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content modal-glass">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title text-white" id="joinModalLabel">
-                        <i class="bi bi-people me-2 text-accent" aria-hidden="true"></i>Are you sure?
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-white-50">
-                    <p class="mb-0">
-                        Your personal recipes remain yours, but storage and family recipes will be
-                        updated with the new family's content.
-                        @if (_user.Role == UserRole.FamilyHead)
-                        {
-                            <span> All your family members will be moved to the new family with you.</span>
-                        }
-                    </p>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-accent" data-bs-dismiss="modal"
-                            @onclick="JoinFamilyAsync">
-                        Proceed
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    @* Leave confirmation *@
-    <div class="modal fade" id="leaveModal" tabindex="-1" aria-labelledby="leaveModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content modal-glass">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title text-white" id="leaveModalLabel">
-                        <i class="bi bi-door-open me-2 text-accent" aria-hidden="true"></i>Are you sure?
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-white-50">
-                    <p class="mb-0">
-                        Your personal recipes remain yours, but you will lose access to this family's
-                        storage and shared recipes. You will become the head of your own household.
-                    </p>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-warning" data-bs-dismiss="modal"
-                            @onclick="LeaveFamilyAsync">
-                        Leave family
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    @* Kick confirmation *@
-    <div class="modal fade" id="kickModal" tabindex="-1" aria-labelledby="kickModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content modal-glass">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title text-white" id="kickModalLabel">
-                        <i class="bi bi-person-x me-2 text-accent" aria-hidden="true"></i>Are you sure?
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-white-50">
-                    <p class="mb-0">
-                        <strong class="text-white">@(_kickTarget?.FullName ?? _kickTarget?.Email)</strong>
-                        will be removed from your family and placed in their own household.
-                    </p>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal"
-                            @onclick="KickMemberAsync">
-                        Kick
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <ConfirmationModal Id="leaveModal"
+                       Title="Are you sure?"
+                       Icon="bi-door-open"
+                       ConfirmText="Leave family"
+                       ConfirmButtonClass="btn-warning"
+                       OnConfirm="LeaveFamilyAsync">
+        <p class="mb-0">
+            Your personal recipes remain yours, but you will lose access to this family's
+            storage and shared recipes. You will become the head of your own household.
+        </p>
+    </ConfirmationModal>
 }
 
 @code {
@@ -245,10 +133,14 @@ else
     private Family? _family;
     private string _joinInput = string.Empty;
     private string? _joinError;
-    private User? _kickTarget;
     private bool _copied;
 
     protected override async Task OnInitializedAsync()
+    {
+        await ReloadUserDataAsync();
+    }
+
+    private async Task ReloadUserDataAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var userIdStr = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -256,7 +148,9 @@ else
 
         _user = await AuthRepository.GetUserByIdAsync(userId);
         if (_user is not null)
+        {
             _family = await FamilyService.GetFamilyWithMembersAsync(_user.FamilyId);
+        }
     }
 
     private async Task JoinFamilyAsync()
@@ -275,61 +169,31 @@ else
             return;
         }
 
-        // Reload
-        _user = await AuthRepository.GetUserByIdAsync(_user.UserId);
-        _family = _user is not null
-            ? await FamilyService.GetFamilyWithMembersAsync(_user.FamilyId)
-            : null;
         _joinInput = string.Empty;
+        await ReloadUserDataAsync();
     }
 
     private async Task LeaveFamilyAsync()
     {
         if (_user is null) return;
         await FamilyService.LeaveToSoloFamilyAsync(_user.UserId);
-
-        _user = await AuthRepository.GetUserByIdAsync(_user.UserId);
-        _family = _user is not null
-            ? await FamilyService.GetFamilyWithMembersAsync(_user.FamilyId)
-            : null;
-    }
-
-    private async Task OpenKickModal(User member)
-    {
-        _kickTarget = member;
-        await JS.InvokeVoidAsync("showModal", "kickModal");
-    }
-
-    private async Task KickMemberAsync()
-    {
-        if (_kickTarget is null || _user is null) return;
-        await FamilyService.KickMemberAsync(_kickTarget.UserId);
-
-        _family = await FamilyService.GetFamilyWithMembersAsync(_user.FamilyId);
-        _kickTarget = null;
+        await ReloadUserDataAsync();
     }
 
     private async Task CopyFamilyId()
     {
-        // Clipboard write is JS-only; we toggle an icon as lightweight feedback.
-        // Full clipboard support can be wired via JSInterop if desired.
         _copied = true;
         await Task.Delay(1500);
         _copied = false;
     }
 
     private string RoleLabel => GetRoleLabel(_user?.Role ?? UserRole.Guest);
+
     private static string GetRoleLabel(UserRole role) => role switch
     {
         UserRole.FamilyHead => "Family Head",
         UserRole.FamilyMember => "Family Member",
         UserRole.Admin => "Admin",
         _ => "Guest"
-    };
-
-    private static string RoleBadgeClass(UserRole role) => role switch
-    {
-        UserRole.FamilyHead => "bg-accent-badge",
-        _ => "bg-secondary"
     };
 }

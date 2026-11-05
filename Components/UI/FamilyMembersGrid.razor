@@ -1,9 +1,9 @@
 @*
-    FamilyMembersGrid - Displays the family members table.
-    Shows all members; FamilyHead row has no Kick button.
-    When IsHead=true, an Action column appears with per-member Kick buttons.
-    Emits OnKickClicked with the target User so the parent can open the confirmation modal.
+    FamilyMembersGrid - Displays family members and manages kicking members.
 *@
+
+@inject IFamilyService FamilyService
+@inject IJSRuntime JS
 
 <div class="glass-card p-4">
     <h6 class="text-white-50 small text-uppercase mb-3">
@@ -46,7 +46,7 @@
                                 @if (member.UserId != CurrentUserId)
                                 {
                                     <button class="btn btn-outline-danger btn-sm"
-                                            @onclick="() => OnKickClicked.InvokeAsync(member)">
+                                            @onclick="() => OpenKickModal(member)">
                                         <i class="bi bi-person-x me-1" aria-hidden="true"></i>Kick
                                     </button>
                                 }
@@ -59,22 +59,52 @@
     </div>
 </div>
 
+@* Kick confirmation modal scoped directly inside the grid *@
+<ConfirmationModal Id="kickModal"
+                   Title="Are you sure?"
+                   Icon="bi-person-x"
+                   ConfirmText="Kick"
+                   ConfirmButtonClass="btn-danger"
+                   OnConfirm="KickMemberAsync">
+    <p class="mb-0">
+        <strong class="text-white">@(_kickTarget?.FullName ?? _kickTarget?.Email)</strong>
+        will be removed from your family and placed in their own household.
+    </p>
+</ConfirmationModal>
+
 @code {
     [Parameter, EditorRequired] public Family Family { get; set; } = default!;
     [Parameter, EditorRequired] public Guid CurrentUserId { get; set; }
     [Parameter, EditorRequired] public bool IsHead { get; set; }
-    [Parameter, EditorRequired] public EventCallback<User> OnKickClicked { get; set; }
+    [Parameter] public EventCallback OnFamilyUpdated { get; set; }
 
-    private static string GetRoleLabel(UserRole role) => role switch {
+    private User? _kickTarget;
+
+    private async Task OpenKickModal(User member)
+    {
+        _kickTarget = member;
+        await JS.InvokeVoidAsync("showModal", "kickModal");
+    }
+
+    private async Task KickMemberAsync()
+    {
+        if (_kickTarget is null) return;
+        await FamilyService.KickMemberAsync(_kickTarget.UserId);
+        _kickTarget = null;
+        await OnFamilyUpdated.InvokeAsync();
+    }
+
+    private static string GetRoleLabel(UserRole role) => role switch
+    {
         UserRole.FamilyHead => "Family Head",
         UserRole.FamilyMember => "Family Member",
         UserRole.Admin => "Admin",
         _ => "Guest"
     };
 
-    private static string RoleBadgeClass(UserRole role) => role switch {
+    private static string RoleBadgeClass(UserRole role) => role switch
+    {
         UserRole.FamilyHead => "bg-accent-badge",
         _ => "bg-secondary"
     };
 }
-

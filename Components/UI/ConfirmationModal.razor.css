@@ -1,0 +1,25 @@
+.modal-glass {
+    background: rgba(26, 15, 10, 0.95);
+    border: 1px solid var(--dwf-glass-border);
+    border-radius: 1rem;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+.text-accent {
+    color: var(--dwf-accent-warm);
+}
+
+.btn-accent {
+    background-color: var(--dwf-accent-warm);
+    color: #1a0f0a;
+    border: none;
+    font-weight: 600;
+}
+
+.btn-accent:hover,
+.btn-accent:focus {
+    background-color: #d4836a;
+    color: #1a0f0a;
+}
