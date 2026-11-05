@@ -42,7 +42,8 @@ public class AuthService : IAuthService
                 FullName = name,
                 AvatarUrl = pictureUrl,
                 Role = UserRole.FamilyHead,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                JoinedAt = DateTime.UtcNow
             };
 
             await _authRepository.CreateUserWithFamilyAsync(user, family);
