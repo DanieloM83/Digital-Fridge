@@ -37,6 +37,9 @@
     @* Bootstrap JS bundle (for navbar toggler, dropdowns) *@
     <script src="@Assets["lib/bootstrap/dist/js/bootstrap.bundle.min.js"]"></script>
 
+    @* Tiny helpers for Blazor → Bootstrap interop *@
+    <script>window.showModal = id => bootstrap.Modal.getOrCreateInstance(document.getElementById(id)).show();</script>
+
     @* Google Identity Services *@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>

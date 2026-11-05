@@ -1,0 +1,110 @@
+@*
+    FamilyMembersGrid - Displays family members and manages kicking members.
+*@
+
+@inject IFamilyService FamilyService
+@inject IJSRuntime JS
+
+<div class="glass-card p-4">
+    <h6 class="text-white-50 small text-uppercase mb-3">
+        Family members (@Family.Members.Count)
+    </h6>
+    <div class="table-responsive">
+        <table class="table table-dark table-hover members-table mb-0">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Joined</th>
+                    @if (IsHead)
+                    {
+                        <th>Action</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var member in Family.Members.OrderBy(m => m.JoinedAt))
+                {
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="@member.AvatarUrl" alt="" class="member-avatar" />
+                                <span class="text-white">@(member.FullName ?? member.Email)</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge @RoleBadgeClass(member.Role)">
+                                @GetRoleLabel(member.Role)
+                            </span>
+                        </td>
+                        <td class="text-white-50 small align-middle">
+                            @member.JoinedAt.ToLocalTime().ToString("MMM d, yyyy")
+                        </td>
+                        @if (IsHead)
+                        {
+                            <td>
+                                @if (member.UserId != CurrentUserId)
+                                {
+                                    <button class="btn btn-outline-danger btn-sm"
+                                            @onclick="() => OpenKickModal(member)">
+                                        <i class="bi bi-person-x me-1" aria-hidden="true"></i>Kick
+                                    </button>
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@* Kick confirmation modal scoped directly inside the grid *@
+<ConfirmationModal Id="kickModal"
+                   Title="Are you sure?"
+                   Icon="bi-person-x"
+                   ConfirmText="Kick"
+                   ConfirmButtonClass="btn-danger"
+                   OnConfirm="KickMemberAsync">
+    <p class="mb-0">
+        <strong class="text-white">@(_kickTarget?.FullName ?? _kickTarget?.Email)</strong>
+        will be removed from your family and placed in their own household.
+    </p>
+</ConfirmationModal>
+
+@code {
+    [Parameter, EditorRequired] public Family Family { get; set; } = default!;
+    [Parameter, EditorRequired] public Guid CurrentUserId { get; set; }
+    [Parameter, EditorRequired] public bool IsHead { get; set; }
+    [Parameter] public EventCallback OnFamilyUpdated { get; set; }
+
+    private User? _kickTarget;
+
+    private async Task OpenKickModal(User member)
+    {
+        _kickTarget = member;
+        await JS.InvokeVoidAsync("showModal", "kickModal");
+    }
+
+    private async Task KickMemberAsync()
+    {
+        if (_kickTarget is null) return;
+        await FamilyService.KickMemberAsync(_kickTarget.UserId);
+        _kickTarget = null;
+        await OnFamilyUpdated.InvokeAsync();
+    }
+
+    private static string GetRoleLabel(UserRole role) => role switch
+    {
+        UserRole.FamilyHead => "Family Head",
+        UserRole.FamilyMember => "Family Member",
+        UserRole.Admin => "Admin",
+        _ => "Guest"
+    };
+
+    private static string RoleBadgeClass(UserRole role) => role switch
+    {
+        UserRole.FamilyHead => "bg-accent-badge",
+        _ => "bg-secondary"
+    };
+}

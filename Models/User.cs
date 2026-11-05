@@ -29,6 +29,8 @@ public class User
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
+
     public List<UserSession> Sessions { get; set; } = [];
     public List<SavedRecipe> SavedRecipes { get; set; } = [];
     public List<Recipe> CreatedRecipes { get; set; } = [];

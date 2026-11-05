@@ -14,35 +14,30 @@ namespace Digital_Fridge.Migrations
         {
             migrationBuilder.CreateTable(
                 name: "Families",
-                columns: table => new
-                {
+                columns: table => new {
                     FamilyId = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_Families", x => x.FamilyId);
                 });
 
             migrationBuilder.CreateTable(
                 name: "ProductCategories",
-                columns: table => new
-                {
+                columns: table => new {
                     CategoryId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     IconUrl = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_ProductCategories", x => x.CategoryId);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Users",
-                columns: table => new
-                {
+                columns: table => new {
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     GoogleId = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
@@ -52,8 +47,7 @@ namespace Digital_Fridge.Migrations
                     FamilyId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_Users", x => x.UserId);
                     table.ForeignKey(
                         name: "FK_Users_Families_FamilyId",
@@ -65,8 +59,7 @@ namespace Digital_Fridge.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Products",
-                columns: table => new
-                {
+                columns: table => new {
                     ProductId = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     CategoryId = table.Column<int>(type: "integer", nullable: false),
@@ -74,8 +67,7 @@ namespace Digital_Fridge.Migrations
                     DefaultUnit = table.Column<string>(type: "text", nullable: false),
                     Barcode = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_Products", x => x.ProductId);
                     table.ForeignKey(
                         name: "FK_Products_ProductCategories_CategoryId",
@@ -87,8 +79,7 @@ namespace Digital_Fridge.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Recipes",
-                columns: table => new
-                {
+                columns: table => new {
                     RecipeId = table.Column<Guid>(type: "uuid", nullable: false),
                     Title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     ShortDescription = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
@@ -100,8 +91,7 @@ namespace Digital_Fridge.Migrations
                     PrepTimeMinutes = table.Column<int>(type: "integer", nullable: false),
                     Servings = table.Column<int>(type: "integer", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_Recipes", x => x.RecipeId);
                     table.ForeignKey(
                         name: "FK_Recipes_Users_CreatedByUserId",
@@ -113,16 +103,14 @@ namespace Digital_Fridge.Migrations
 
             migrationBuilder.CreateTable(
                 name: "UserSessions",
-                columns: table => new
-                {
+                columns: table => new {
                     SessionId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ExpiresAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     IsRevoked = table.Column<bool>(type: "boolean", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_UserSessions", x => x.SessionId);
                     table.ForeignKey(
                         name: "FK_UserSessions_Users_UserId",
@@ -134,8 +122,7 @@ namespace Digital_Fridge.Migrations
 
             migrationBuilder.CreateTable(
                 name: "FridgeItems",
-                columns: table => new
-                {
+                columns: table => new {
                     FridgeItemId = table.Column<Guid>(type: "uuid", nullable: false),
                     FamilyId = table.Column<Guid>(type: "uuid", nullable: false),
                     ProductId = table.Column<Guid>(type: "uuid", nullable: false),
@@ -145,8 +132,7 @@ namespace Digital_Fridge.Migrations
                     EntryMethod = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_FridgeItems", x => x.FridgeItemId);
                     table.ForeignKey(
                         name: "FK_FridgeItems_Families_FamilyId",
@@ -164,16 +150,14 @@ namespace Digital_Fridge.Migrations
 
             migrationBuilder.CreateTable(
                 name: "RecipeIngredients",
-                columns: table => new
-                {
+                columns: table => new {
                     RecipeId = table.Column<Guid>(type: "uuid", nullable: false),
                     ProductId = table.Column<Guid>(type: "uuid", nullable: false),
                     Quantity = table.Column<decimal>(type: "numeric(8,2)", precision: 8, scale: 2, nullable: false),
                     Unit = table.Column<string>(type: "text", nullable: false),
                     IsOptional = table.Column<bool>(type: "boolean", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_RecipeIngredients", x => new { x.RecipeId, x.ProductId });
                     table.ForeignKey(
                         name: "FK_RecipeIngredients_Products_ProductId",
@@ -191,16 +175,14 @@ namespace Digital_Fridge.Migrations
 
             migrationBuilder.CreateTable(
                 name: "SavedRecipes",
-                columns: table => new
-                {
+                columns: table => new {
                     SavedRecipeId = table.Column<Guid>(type: "uuid", nullable: false),
                     RecipeId = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: true),
                     FamilyId = table.Column<Guid>(type: "uuid", nullable: true),
                     SavedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_SavedRecipes", x => x.SavedRecipeId);
                     table.ForeignKey(
                         name: "FK_SavedRecipes_Families_FamilyId",

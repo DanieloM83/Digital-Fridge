@@ -1,0 +1,41 @@
+@*
+    ConfirmationModal - Reusable Bootstrap confirmation modal dialog.
+*@
+
+<div class="modal fade" id="@Id" tabindex="-1" aria-labelledby="@($"{Id}Label")" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-glass">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-white" id="@($"{Id}Label")">
+                    @if (!string.IsNullOrEmpty(Icon))
+                    {
+                        <i class="bi @Icon me-2 text-accent" aria-hidden="true"></i>
+                    }
+                    @Title
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-white-50">
+                @ChildContent
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn @ConfirmButtonClass" data-bs-dismiss="modal" @onclick="OnConfirm">
+                    @ConfirmText
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+    [Parameter] public string Title { get; set; } = "Are you sure?";
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public string ConfirmText { get; set; } = "Proceed";
+    [Parameter] public string ConfirmButtonClass { get; set; } = "btn-accent";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public EventCallback OnConfirm { get; set; }
+}
+

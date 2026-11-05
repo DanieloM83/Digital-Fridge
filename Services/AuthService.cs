@@ -28,15 +28,13 @@ public class AuthService : IAuthService
             var familyAndUserId = Guid.NewGuid();
             var householdName = string.IsNullOrWhiteSpace(name) ? "My Household" : $"{name.Trim()}'s Household";
 
-            var family = new Family
-            {
+            var family = new Family {
                 FamilyId = familyAndUserId,
                 Name = householdName,
                 CreatedAt = DateTime.UtcNow
             };
 
-            user = new User
-            {
+            user = new User {
                 UserId = familyAndUserId,
                 FamilyId = familyAndUserId,
                 GoogleId = googleId,
@@ -44,7 +42,8 @@ public class AuthService : IAuthService
                 FullName = name,
                 AvatarUrl = pictureUrl,
                 Role = UserRole.FamilyHead,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                JoinedAt = DateTime.UtcNow
             };
 
             await _authRepository.CreateUserWithFamilyAsync(user, family);
@@ -81,8 +80,7 @@ public class AuthService : IAuthService
         var sessionId = Guid.NewGuid().ToString("N");
         var sessionDuration = duration ?? TimeSpan.FromDays(7);
 
-        var session = new UserSession
-        {
+        var session = new UserSession {
             SessionId = sessionId,
             UserId = user.UserId,
             CreatedAtUtc = DateTime.UtcNow,

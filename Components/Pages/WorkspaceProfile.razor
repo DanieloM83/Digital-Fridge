@@ -1,14 +1,199 @@
+@*
+    WorkspaceProfile - User profile and family management.
+    Handles user state, joining, and leaving families.
+*@
+
 @page "/workspace/profile"
 @layout WorkspaceLayout
 @attribute [Authorize]
+@rendermode InteractiveServer
+
+@inject IAuthRepository AuthRepository
+@inject IFamilyService FamilyService
+@inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Profile - Workspace</PageTitle>
 
-<div class="container-fluid flex-grow-1 d-flex flex-column align-items-center justify-content-center text-white p-4">
-    <div class="text-center">
-        <i class="bi bi-person text-accent display-4 mb-3 d-block" aria-hidden="true"></i>
-        <h2 class="fw-bold mb-2">Profile & Settings</h2>
-        <p class="text-white-50">Manage your account preferences, dietary restrictions, and family sharing.</p>
+@if (_user is null)
+{
+    <div class="d-flex justify-content-center align-items-center flex-grow-1 p-4">
+        <div class="spinner-border text-accent" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
     </div>
-</div>
+}
+else
+{
+    <div class="profile-page p-3 p-md-4 d-flex flex-column gap-3">
 
+        @* 1. Profile card *@
+        <div class="glass-card p-4 d-flex align-items-center gap-3 flex-wrap">
+            <img src="@_user.AvatarUrl" alt="Avatar" class="profile-avatar" />
+            <div class="flex-grow-1">
+                <h5 class="fw-bold text-white mb-1">@(_user.FullName ?? _user.Email)</h5>
+                <span class="badge role-badge">@RoleLabel</span>
+            </div>
+            <a href="/api/auth/logout" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-box-arrow-right me-1" aria-hidden="true"></i>Logout
+            </a>
+        </div>
+
+        @* 2. Family ID + Leave  *@
+        <div class="glass-card p-4 d-flex align-items-center gap-3 flex-wrap">
+            <div class="flex-grow-1">
+                <span class="text-white small text-uppercase tracking-wide">@(_family?.Name ?? "Family")</span>
+                <div class="d-flex align-items-center gap-2 mt-1">
+                    <code class="family-id-code" title="@_user.FamilyId.ToString()">
+                        @_user.FamilyId.ToString()[..8]…
+                    </code>
+                    <button class="btn btn-sm btn-ghost-icon" title="Copy full Family ID"
+                            @onclick="CopyFamilyId">
+                        <i class="bi @(_copied ? "bi-check2" : "bi-clipboard")" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            @if (_user.Role == UserRole.FamilyMember)
+            {
+                <button class="btn btn-outline-warning btn-sm"
+                        data-bs-toggle="modal" data-bs-target="#leaveModal">
+                    <i class="bi bi-door-open me-1" aria-hidden="true"></i>Leave family
+                </button>
+            }
+        </div>
+
+        @* 3. Join family *@
+        <div class="glass-card p-4">
+            <label for="joinInput" class="form-label text-white-50 small text-uppercase">
+                Join another family
+            </label>
+            <div class="d-flex gap-2 flex-wrap">
+                <input id="joinInput"
+                       type="text"
+                       class="form-control form-control-dark flex-grow-1"
+                       placeholder="New family ID…"
+                       maxlength="36"
+                       @bind="_joinInput"
+                       @bind:event="oninput" />
+                <button class="btn btn-accent"
+                        disabled="@string.IsNullOrWhiteSpace(_joinInput)"
+                        data-bs-toggle="modal" data-bs-target="#joinModal">
+                    <i class="bi bi-people me-1" aria-hidden="true"></i>Join family
+                </button>
+            </div>
+            @if (_joinError is not null)
+            {
+                <p class="text-warning mt-2 mb-0 small">
+                    <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>@_joinError
+                </p>
+            }
+        </div>
+
+        @* 4. Family members grid *@
+        @if (_family is not null)
+        {
+            <FamilyMembersGrid Family="_family"
+                               CurrentUserId="_user.UserId"
+                               IsHead="_user.Role == UserRole.FamilyHead"
+                               OnFamilyUpdated="ReloadUserDataAsync" />
+        }
+    </div>
+
+    @* Confirmation Modals *@
+    <ConfirmationModal Id="joinModal"
+                       Title="Are you sure?"
+                       Icon="bi-people"
+                       ConfirmText="Proceed"
+                       ConfirmButtonClass="btn-accent"
+                       OnConfirm="JoinFamilyAsync">
+        <p class="mb-0">
+            Your personal recipes remain yours, but storage and family recipes will be
+            updated with the new family's content.
+            @if (_user.Role == UserRole.FamilyHead)
+            {
+                <span> All your family members will be moved to the new family with you.</span>
+            }
+        </p>
+    </ConfirmationModal>
+
+    <ConfirmationModal Id="leaveModal"
+                       Title="Are you sure?"
+                       Icon="bi-door-open"
+                       ConfirmText="Leave family"
+                       ConfirmButtonClass="btn-warning"
+                       OnConfirm="LeaveFamilyAsync">
+        <p class="mb-0">
+            Your personal recipes remain yours, but you will lose access to this family's
+            storage and shared recipes. You will become the head of your own household.
+        </p>
+    </ConfirmationModal>
+}
+
+@code {
+    private User? _user;
+    private Family? _family;
+    private string _joinInput = string.Empty;
+    private string? _joinError;
+    private bool _copied;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadUserDataAsync();
+    }
+
+    private async Task ReloadUserDataAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var userIdStr = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!Guid.TryParse(userIdStr, out var userId)) return;
+
+        _user = await AuthRepository.GetUserByIdAsync(userId);
+        if (_user is not null)
+        {
+            _family = await FamilyService.GetFamilyWithMembersAsync(_user.FamilyId);
+        }
+    }
+
+    private async Task JoinFamilyAsync()
+    {
+        _joinError = null;
+        if (_user is null || !Guid.TryParse(_joinInput.Trim(), out var targetId))
+        {
+            _joinError = "Please enter a valid family ID (UUID format).";
+            return;
+        }
+
+        var success = await FamilyService.JoinFamilyAsync(_user.UserId, targetId);
+        if (!success)
+        {
+            _joinError = "Family not found. Double-check the ID and try again.";
+            return;
+        }
+
+        _joinInput = string.Empty;
+        await ReloadUserDataAsync();
+    }
+
+    private async Task LeaveFamilyAsync()
+    {
+        if (_user is null) return;
+        await FamilyService.LeaveToSoloFamilyAsync(_user.UserId);
+        await ReloadUserDataAsync();
+    }
+
+    private async Task CopyFamilyId()
+    {
+        _copied = true;
+        await Task.Delay(1500);
+        _copied = false;
+    }
+
+    private string RoleLabel => GetRoleLabel(_user?.Role ?? UserRole.Guest);
+
+    private static string GetRoleLabel(UserRole role) => role switch
+    {
+        UserRole.FamilyHead => "Family Head",
+        UserRole.FamilyMember => "Family Member",
+        UserRole.Admin => "Admin",
+        _ => "Guest"
+    };
+}
