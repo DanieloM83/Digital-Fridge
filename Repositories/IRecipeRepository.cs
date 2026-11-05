@@ -5,6 +5,7 @@ namespace Digital_Fridge.Repositories;
 public interface IRecipeRepository
 {
     Task<IReadOnlyList<Recipe>> GetPublicRecipesAsync();
+    Task<IReadOnlyList<Recipe>> GetSavedRecipesByContextAsync(Guid? userId, Guid? familyId);
     Task<Recipe?> GetByIdAsync(Guid recipeId);
     Task<Recipe> AddAsync(Recipe recipe);
     Task UpdateAsync(Recipe recipe);

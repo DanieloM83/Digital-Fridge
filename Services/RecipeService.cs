@@ -15,30 +15,13 @@ public class RecipeService : IRecipeService
     public async Task<IReadOnlyList<Recipe>> GetPublicRecipesAsync(string? searchQuery = null)
     {
         var recipes = await _recipeRepository.GetPublicRecipesAsync();
+        return FilterRecipes(recipes, searchQuery);
+    }
 
-        if (string.IsNullOrWhiteSpace(searchQuery))
-        {
-            return recipes;
-        }
-
-        var terms = searchQuery
-            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Select(t => t.Trim().ToLowerInvariant())
-            .Where(t => !string.IsNullOrEmpty(t))
-            .ToList();
-
-        if (terms.Count == 0)
-        {
-            terms.Add(searchQuery.Trim().ToLowerInvariant());
-        }
-
-        return recipes
-            .Where(r =>
-                terms.Any(term => r.Title.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
-                (r.ShortDescription != null && terms.Any(term => r.ShortDescription.Contains(term, StringComparison.OrdinalIgnoreCase))) ||
-                r.Ingredients.Any(i => i.Product != null && terms.Any(term => i.Product.Name.Contains(term, StringComparison.OrdinalIgnoreCase)))
-            )
-            .ToList();
+    public async Task<IReadOnlyList<Recipe>> GetSavedRecipesAsync(Guid? userId, Guid? familyId, string? searchQuery = null)
+    {
+        var recipes = await _recipeRepository.GetSavedRecipesByContextAsync(userId, familyId);
+        return FilterRecipes(recipes, searchQuery);
     }
 
     public async Task<Recipe?> GetRecipeByIdAsync(Guid recipeId)
@@ -65,5 +48,32 @@ public class RecipeService : IRecipeService
     public async Task<bool> MakeRecipePublicAsync(Guid recipeId, Guid authorUserId)
     {
         return await _recipeRepository.MakeRecipePublicAsync(recipeId, authorUserId);
+    }
+
+    private static IReadOnlyList<Recipe> FilterRecipes(IReadOnlyList<Recipe> recipes, string? searchQuery)
+    {
+        if (string.IsNullOrWhiteSpace(searchQuery))
+        {
+            return recipes;
+        }
+
+        var terms = searchQuery
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(t => t.Trim().ToLowerInvariant())
+            .Where(t => !string.IsNullOrEmpty(t))
+            .ToList();
+
+        if (terms.Count == 0)
+        {
+            terms.Add(searchQuery.Trim().ToLowerInvariant());
+        }
+
+        return recipes
+            .Where(r =>
+                terms.Any(term => r.Title.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                (r.ShortDescription != null && terms.Any(term => r.ShortDescription.Contains(term, StringComparison.OrdinalIgnoreCase))) ||
+                r.Ingredients.Any(i => i.Product != null && terms.Any(term => i.Product.Name.Contains(term, StringComparison.OrdinalIgnoreCase)))
+            )
+            .ToList();
     }
 }

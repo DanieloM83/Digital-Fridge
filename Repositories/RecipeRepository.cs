@@ -25,6 +25,37 @@ public class RecipeRepository : IRecipeRepository
             .ToListAsync();
     }
 
+    public async Task<IReadOnlyList<Recipe>> GetSavedRecipesByContextAsync(Guid? userId, Guid? familyId)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        var query = context.SavedRecipes
+            .AsNoTracking()
+            .Include(sr => sr.Recipe)
+                .ThenInclude(r => r!.Ingredients)
+                    .ThenInclude(ri => ri.Product)
+            .Where(sr => sr.Recipe != null);
+
+        if (userId.HasValue)
+        {
+            query = query.Where(sr => sr.UserId == userId.Value);
+        }
+        else if (familyId.HasValue)
+        {
+            query = query.Where(sr => sr.FamilyId == familyId.Value);
+        }
+        else
+        {
+            return Array.Empty<Recipe>();
+        }
+
+        return await query
+            .OrderByDescending(sr => sr.SavedAt)
+            .Select(sr => sr.Recipe!)
+            .Distinct()
+            .ToListAsync();
+    }
+
     public async Task<Recipe?> GetByIdAsync(Guid recipeId)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
