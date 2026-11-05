@@ -73,4 +73,70 @@ public class RecipeRepository : IRecipeRepository
         await context.Recipes.AddRangeAsync(recipes);
         await context.SaveChangesAsync();
     }
+
+    public async Task<IReadOnlyList<SavedRecipe>> GetSavedRecipesAsync(Guid recipeId, Guid? userId, Guid? familyId)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        return await context.SavedRecipes
+            .AsNoTracking()
+            .Where(sr => sr.RecipeId == recipeId &&
+                ((userId.HasValue && sr.UserId == userId.Value) ||
+                 (familyId.HasValue && sr.FamilyId == familyId.Value)))
+            .ToListAsync();
+    }
+
+    public async Task<bool> ToggleUserBookmarkAsync(Guid recipeId, Guid userId)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        var existing = await context.SavedRecipes.FirstOrDefaultAsync(sr => sr.RecipeId == recipeId && sr.UserId == userId);
+        if (existing != null)
+        {
+            context.SavedRecipes.Remove(existing);
+            await context.SaveChangesAsync();
+            return false;
+        }
+
+        var saved = new SavedRecipe
+        {
+            RecipeId = recipeId,
+            UserId = userId,
+            SavedAt = DateTime.UtcNow
+        };
+        context.SavedRecipes.Add(saved);
+        await context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> ToggleFamilyBookmarkAsync(Guid recipeId, Guid familyId)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        var existing = await context.SavedRecipes.FirstOrDefaultAsync(sr => sr.RecipeId == recipeId && sr.FamilyId == familyId);
+        if (existing != null)
+        {
+            context.SavedRecipes.Remove(existing);
+            await context.SaveChangesAsync();
+            return false;
+        }
+
+        var saved = new SavedRecipe
+        {
+            RecipeId = recipeId,
+            FamilyId = familyId,
+            SavedAt = DateTime.UtcNow
+        };
+        context.SavedRecipes.Add(saved);
+        await context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> MakeRecipePublicAsync(Guid recipeId, Guid authorUserId)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        var recipe = await context.Recipes.FirstOrDefaultAsync(r => r.RecipeId == recipeId && r.CreatedByUserId == authorUserId);
+        if (recipe == null) return false;
+
+        recipe.IsPublic = true;
+        await context.SaveChangesAsync();
+        return true;
+    }
 }

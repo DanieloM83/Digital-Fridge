@@ -45,4 +45,25 @@ public class RecipeService : IRecipeService
     {
         return await _recipeRepository.GetByIdAsync(recipeId);
     }
+
+    public async Task<IReadOnlyList<SavedRecipe>> GetSavedRecipesForContextAsync(Guid recipeId, Guid? userId, Guid? familyId)
+    {
+        return await _recipeRepository.GetSavedRecipesAsync(recipeId, userId, familyId);
+    }
+
+    public async Task<bool> ToggleBookmarkAsync(Guid recipeId, Guid userId, Guid? familyId, string target)
+    {
+        if (target.Equals("family", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!familyId.HasValue) return false;
+            return await _recipeRepository.ToggleFamilyBookmarkAsync(recipeId, familyId.Value);
+        }
+
+        return await _recipeRepository.ToggleUserBookmarkAsync(recipeId, userId);
+    }
+
+    public async Task<bool> MakeRecipePublicAsync(Guid recipeId, Guid authorUserId)
+    {
+        return await _recipeRepository.MakeRecipePublicAsync(recipeId, authorUserId);
+    }
 }
