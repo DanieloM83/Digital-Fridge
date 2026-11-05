@@ -1,0 +1,41 @@
+@*
+    KickMemberModal - Bootstrap confirmation modal for kicking a family member.
+    Opened programmatically via JS (showModal) after Target is set by the parent.
+*@
+
+<div class="modal fade" id="kickModal" tabindex="-1" aria-labelledby="kickModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-glass">
+
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-white" id="kickModalLabel">
+                    <i class="bi bi-person-x me-2 text-accent" aria-hidden="true"></i>Are you sure?
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body text-white-50">
+                <p class="mb-0">
+                    <strong class="text-white">@(Target?.FullName ?? Target?.Email)</strong>
+                    will be removed from your family and placed in their own household.
+                </p>
+            </div>
+
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" @onclick="OnConfirm">
+                    Kick
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    /// <summary>The member about to be kicked. Caller sets this before opening the modal.</summary>
+    [Parameter] public User? Target { get; set; }
+    [Parameter, EditorRequired] public EventCallback OnConfirm { get; set; }
+}
+
