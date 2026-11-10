@@ -19,9 +19,9 @@
 
         @* Top-left Back Navigation *@
         <div class="mb-4">
-            <a href="/recipes" class="btn btn-outline-light btn-sm d-inline-flex align-items-center gap-2 back-link">
+            <a href="@BackUrl" class="btn btn-outline-light btn-sm d-inline-flex align-items-center gap-2 back-link">
                 <i class="bi bi-arrow-left" aria-hidden="true"></i>
-                <span>Back to Recipes</span>
+                <span>@BackLabel</span>
             </a>
         </div>
 
@@ -218,6 +218,18 @@
 @code {
     [Parameter]
     public Guid Id { get; set; }
+
+    [SupplyParameterFromQuery(Name = "returnUrl")]
+    public string? ReturnUrl { get; set; }
+
+    private string BackUrl => !string.IsNullOrWhiteSpace(ReturnUrl) ? ReturnUrl : "/recipes";
+
+    private string BackLabel => ReturnUrl switch
+    {
+        var url when !string.IsNullOrEmpty(url) && url.Contains("scope=family") => "Back to Family Recipes",
+        var url when !string.IsNullOrEmpty(url) && url.Contains("/workspace/recipes") => "Back to Saved Recipes",
+        _ => "Back to Recipes"
+    };
 
     private Recipe? _recipe;
     private User? _currentUser;

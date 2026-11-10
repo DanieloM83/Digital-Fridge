@@ -11,6 +11,7 @@
 @inject IRecipeService RecipeService
 @inject IAuthRepository AuthRepository
 @inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
 
 <PageTitle>Saved Recipes - Workspace</PageTitle>
 
@@ -98,7 +99,7 @@
                 @foreach (var recipe in recipes)
                 {
                     <div class="col" @key="recipe.RecipeId">
-                        <RecipeCard Recipe="recipe" />
+                        <RecipeCard Recipe="recipe" ReturnUrl="@GetReturnUrl()" />
                     </div>
                 }
             </div>
@@ -114,6 +115,9 @@
         Family
     }
 
+    [SupplyParameterFromQuery(Name = "scope")]
+    public string? ScopeQuery { get; set; }
+
     private RecipeScope currentScope = RecipeScope.Personal;
     private string searchQuery = string.Empty;
     private IReadOnlyList<Recipe>? recipes;
@@ -121,6 +125,11 @@
 
     protected override async Task OnInitializedAsync()
     {
+        if (string.Equals(ScopeQuery, "family", StringComparison.OrdinalIgnoreCase))
+        {
+            currentScope = RecipeScope.Family;
+        }
+
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var userIdStr = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -130,6 +139,13 @@
         }
 
         await LoadRecipesAsync();
+    }
+
+    private string GetReturnUrl()
+    {
+        return currentScope == RecipeScope.Family
+            ? "/workspace/recipes?scope=family"
+            : "/workspace/recipes";
     }
 
     private async Task SwitchScopeAsync(RecipeScope newScope)
