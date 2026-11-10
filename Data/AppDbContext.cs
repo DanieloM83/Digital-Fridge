@@ -23,9 +23,6 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // ------------------------------------------
-        // Household & Identity Domain
-        // ------------------------------------------
         modelBuilder.Entity<Family>(entity => {
             entity.HasMany(f => f.Members)
                   .WithOne(u => u.Family)
@@ -72,9 +69,6 @@ public class AppDbContext : DbContext
             entity.HasIndex(s => s.IsRevoked);
         });
 
-        // ------------------------------------------
-        // Product Taxonomy & Inventory Domain
-        // ------------------------------------------
         modelBuilder.Entity<ProductCategory>(entity => {
             entity.HasIndex(pc => pc.Name).IsUnique();
 
@@ -116,9 +110,6 @@ public class AppDbContext : DbContext
                   .HasConversion<string>();
         });
 
-        // ------------------------------------------
-        // Recipe & Curation Domain
-        // ------------------------------------------
         modelBuilder.Entity<Recipe>(entity => {
             entity.HasIndex(r => r.IsPublic);
             entity.HasIndex(r => r.Title);
