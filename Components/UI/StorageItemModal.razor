@@ -1,0 +1,212 @@
+@*
+    StorageItemModal - Modal dialog for adding or editing a fridge product manually.
+*@
+
+@using System.ComponentModel.DataAnnotations
+@using Digital_Fridge.Models.Enums
+
+<div class="modal fade" id="@ModalId" tabindex="-1" aria-labelledby="@($"{ModalId}Label")" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content modal-glass">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title text-white fw-bold" id="@($"{ModalId}Label")">
+                    <i class="bi @(IsEditMode ? "bi-pencil-square" : "bi-patch-plus") me-2 text-accent"
+                       aria-hidden="true"></i>
+                    @(IsEditMode ? "Edit Storage Item" : "Add Storage Item")
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body text-white pt-3">
+                <div class="row g-3">
+                    @* Product Name *@
+                    <div class="col-12 col-md-6">
+                        <label for="productName" class="form-label small text-white-50 text-uppercase">
+                            Product Name <span class="text-danger">*</span>
+                        </label>
+                        <input id="productName" type="text" class="form-control form-control-dark"
+                               placeholder="e.g. Greek Yogurt, Tomatoes..." @bind="Model.Name" />
+                        @if (_nameError is not null)
+                        {
+                            <span class="text-warning small">@_nameError</span>
+                        }
+                    </div>
+
+                    @* Category Dropdown with Search *@
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small text-white-50 text-uppercase">
+                            Category <span class="text-danger">*</span>
+                        </label>
+                        <div class="dropdown category-dropdown-wrapper">
+                            <button
+                                class="form-control form-control-dark d-flex justify-content-between align-items-center text-start"
+                                type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside"
+                                aria-expanded="false">
+                                <span>@(SelectedCategoryName ?? "Select a category...")</span>
+                                <i class="bi bi-chevron-down text-white-50 small"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-dark p-2 category-dropdown-menu w-100">
+                                <div class="input-group input-group-sm mb-2">
+                                    <span class="input-group-text bg-transparent border-secondary text-white-50">
+                                        <i class="bi bi-search"></i>
+                                    </span>
+                                    <input type="text" class="form-control bg-transparent border-secondary text-white"
+                                           placeholder="Filter categories..." value="@_categoryFilter"
+                                           @oninput="OnCategoryFilterInput" />
+                                </div>
+                                <div class="category-list-scrollable">
+                                    @foreach (var cat in FilteredCategories)
+                                    {
+                                        <button type="button"
+                                                class="dropdown-item d-flex align-items-center gap-2 py-2 rounded @(Model.CategoryId == cat.CategoryId ? "active" : "")"
+                                                @onclick="() => SelectCategory(cat)">
+                                            @if (!string.IsNullOrEmpty(cat.IconUrl))
+                                            {
+                                                <i class="bi @cat.IconUrl text-accent"></i>
+                                            }
+                                            <span>@cat.Name</span>
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @* Quantity & Unit *@
+                    <div class="col-12 col-md-6">
+                        <label for="itemQuantity" class="form-label small text-white-50 text-uppercase">
+                            Quantity <span class="text-danger">*</span>
+                        </label>
+                        <input id="itemQuantity" type="number" step="any" min="0.01"
+                               class="form-control form-control-dark" @bind="Model.Quantity" />
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label for="itemUnit" class="form-label small text-white-50 text-uppercase">
+                            Measurement Unit <span class="text-danger">*</span>
+                        </label>
+                        <select id="itemUnit" class="form-select form-control-dark" @bind="Model.Unit">
+                            @foreach (var unit in Enum.GetValues<UnitEnum>())
+                            {
+                                <option value="@unit">@unit</option>
+                            }
+                        </select>
+                    </div>
+
+                    @* Processing Level *@
+                    <div class="col-12 col-md-6">
+                        <label for="processingLevel" class="form-label small text-white-50 text-uppercase">
+                            Processing Level
+                        </label>
+                        <select id="processingLevel" class="form-select form-control-dark"
+                                @bind="Model.ProcessingLevel">
+                            <option value="">None / Unspecified</option>
+                            @foreach (var level in Enum.GetValues<ProcessingLevel>())
+                            {
+                                <option value="@level">@level</option>
+                            }
+                        </select>
+                    </div>
+
+                    @* Expiration Date *@
+                    <div class="col-12 col-md-6">
+                        <label for="expirationDate" class="form-label small text-white-50 text-uppercase">
+                            Expiration Date
+                        </label>
+                        <input id="expirationDate" type="date" class="form-control form-control-dark"
+                               value="@Model.ExpirationDate?.ToString("yyyy-MM-dd")" @onchange="OnDateChanged" />
+                    </div>
+
+                    @* Barcode *@
+                    <div class="col-12">
+                        <label for="barcode" class="form-label small text-white-50 text-uppercase">
+                            Barcode (Optional)
+                        </label>
+                        <input id="barcode" type="text" class="form-control form-control-dark"
+                               placeholder="e.g. 012345678905" @bind="Model.Barcode" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-accent px-4" @onclick="HandleSaveAsync">
+                    @(IsEditMode ? "Save Changes" : "Add to Storage")
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string ModalId { get; set; } = "storageItemModal";
+    [Parameter] public bool IsEditMode { get; set; }
+    [Parameter, EditorRequired] public StorageItemFormModel Model { get; set; } = new();
+    [Parameter] public IReadOnlyList<ProductCategory> Categories { get; set; } = [];
+    [Parameter] public EventCallback<StorageItemFormModel> OnSave { get; set; }
+
+    private string _categoryFilter = string.Empty;
+    private string? _nameError;
+
+    private string? SelectedCategoryName =>
+        Categories.FirstOrDefault(c => c.CategoryId == Model.CategoryId)?.Name;
+
+    private IEnumerable<ProductCategory> FilteredCategories =>
+        string.IsNullOrWhiteSpace(_categoryFilter)
+            ? Categories
+            : Categories.Where(c => c.Name.Contains(_categoryFilter, StringComparison.OrdinalIgnoreCase));
+
+    private void OnCategoryFilterInput(ChangeEventArgs e)
+    {
+        _categoryFilter = e.Value?.ToString() ?? string.Empty;
+    }
+
+    private void SelectCategory(ProductCategory category)
+    {
+        Model.CategoryId = category.CategoryId;
+    }
+
+    private void OnDateChanged(ChangeEventArgs e)
+    {
+        if (DateOnly.TryParse(e.Value?.ToString(), out var date))
+        {
+            Model.ExpirationDate = date;
+        }
+        else
+        {
+            Model.ExpirationDate = null;
+        }
+    }
+
+    private async Task HandleSaveAsync()
+    {
+        _nameError = null;
+        if (string.IsNullOrWhiteSpace(Model.Name))
+        {
+            _nameError = "Product name is required.";
+            return;
+        }
+
+        if (Model.CategoryId == 0 && Categories.Count > 0)
+        {
+            Model.CategoryId = Categories[0].CategoryId;
+        }
+
+        await OnSave.InvokeAsync(Model);
+    }
+
+    public class StorageItemFormModel
+    {
+        public Guid FridgeItemId { get; set; }
+        public Guid ProductId { get; set; }
+
+        public string Name { get; set; } = string.Empty;
+        public int CategoryId { get; set; }
+        public ProcessingLevel? ProcessingLevel { get; set; }
+        public UnitEnum Unit { get; set; } = UnitEnum.Pieces;
+        public decimal Quantity { get; set; } = 1;
+        public DateOnly? ExpirationDate { get; set; }
+        public string? Barcode { get; set; }
+    }
+}
