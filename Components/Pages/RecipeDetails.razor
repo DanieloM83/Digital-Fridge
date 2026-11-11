@@ -1,0 +1,353 @@
+@*
+    RecipeDetails - Displays full recipe information including image, metadata,
+    interactive registered-user bookmarking/sharing, ingredients, and instructions.
+*@
+
+@page "/recipes/{id:guid}"
+@rendermode InteractiveServer
+
+@inject IRecipeService RecipeService
+@inject IAuthRepository AuthRepository
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<PageTitle>@(_recipe?.Title ?? "Recipe Details") - Digital Web Fridge</PageTitle>
+
+<section class="recipe-details-page py-5">
+    <div class="container pt-4 pb-5">
+
+        @* Top-left Back Navigation *@
+        <div class="mb-4">
+            <a href="@BackUrl" class="btn btn-outline-light btn-sm d-inline-flex align-items-center gap-2 back-link">
+                <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                <span>@BackLabel</span>
+            </a>
+        </div>
+
+        @if (_isLoading)
+        {
+            <div class="d-flex justify-content-center align-items-center py-5">
+                <div class="spinner-border text-accent" role="status">
+                    <span class="visually-hidden">Loading recipe...</span>
+                </div>
+            </div>
+        }
+        else if (_recipe is null)
+        {
+            <div class="glass-card text-center text-white p-5 mx-auto not-found-card">
+                <i class="bi bi-exclamation-circle text-accent display-4 mb-3 d-block" aria-hidden="true"></i>
+                <h3 class="fw-bold mb-2">Recipe Not Found</h3>
+                <p class="text-white-50 mb-4">
+                    The recipe you are looking for does not exist or may have been removed.
+                </p>
+                <a href="/recipes" class="btn btn-accent">Browse Public Recipes</a>
+            </div>
+        }
+        else
+        {
+            @* Large Recipe Card *@
+            <div class="glass-card recipe-main-card mx-auto overflow-hidden">
+
+                @* Top Center High-Resolution Image *@
+                @if (!string.IsNullOrEmpty(_recipe.ImageUrl))
+                {
+                    <div class="recipe-hero-image-wrapper">
+                        <img src="@_recipe.ImageUrl" alt="@_recipe.Title" class="recipe-hero-image" />
+                    </div>
+                }
+
+                @* Header bar below image: Left public link (for author), Right action buttons *@
+                @if (_currentUser is not null)
+                {
+                    <div
+                        class="recipe-action-header d-flex flex-wrap align-items-center justify-content-between gap-3 px-4 px-md-5 py-3">
+                        @* Left: Public recipe link for author *@
+                        <div class="d-flex align-items-center gap-2 public-link-container">
+                            @if (_recipe.IsPublic && IsAuthor)
+                            {
+                                <span class="public-recipe-link" @onclick="CopyPublicLinkAsync"
+                                      title="Click to copy public recipe link">
+                                    <i class="bi bi-link-45deg me-1"></i>@GetPublicUrl()
+                                </span>
+                                @if (_copiedLink)
+                                {
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle small fade-in">
+                                        <i class="bi bi-check2 me-1"></i>Copied!
+                                    </span>
+                                }
+                            }
+                        </div>
+
+                        @* Right: Action buttons *@
+                        <div class="d-flex align-items-center gap-2 ms-auto">
+                            @* 1. Personal Bookmark Button *@
+                            <button class="btn btn-action-icon @(_isUserBookmarked ? "active" : "")" type="button"
+                                    disabled="@_isBusy" @onclick="TogglePersonalBookmarkAsync"
+                                    title="@(_isUserBookmarked ? "Remove from personal recipes" : "Add to personal recipes")"
+                                    aria-label="Personal bookmark">
+                                <i class="bi @(_isUserBookmarked ? "bi-bookmark-fill" : "bi-bookmark") fs-5"></i>
+                            </button>
+
+                            @* 2. Family Bookmark Button (Family Head only) *@
+                            @if (IsFamilyHead)
+                            {
+                                <button class="btn btn-action-icon @(_isFamilyBookmarked ? "active" : "")" type="button"
+                                        disabled="@_isBusy" @onclick="ToggleFamilyBookmarkAsync"
+                                        title="@(_isFamilyBookmarked ? "Remove from family recipes" : "Add to family recipes")"
+                                        aria-label="Family bookmark">
+                                    <i class="bi @(_isFamilyBookmarked ? "bi-bookmarks-fill" : "bi-bookmarks") fs-5"></i>
+                                </button>
+                            }
+
+                            @* 3. Share Button (Author only, when not yet public) *@
+                            @if (IsAuthor && !_recipe.IsPublic)
+                            {
+                                <button class="btn btn-accent btn-sm d-inline-flex align-items-center gap-1" type="button"
+                                        disabled="@_isBusy" @onclick="MakePublicAsync" title="Make recipe publicly accessible">
+                                    <i class="bi bi-share"></i>
+                                    <span>Share</span>
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <div class="p-4 p-md-5 pt-3">
+                    @* Title & Short Description *@
+                    <h1 class="recipe-title fw-bold text-white mb-2">@_recipe.Title</h1>
+
+                    @if (!string.IsNullOrWhiteSpace(_recipe.ShortDescription))
+                    {
+                        <p class="recipe-description text-white-50 lead mb-4">
+                            @_recipe.ShortDescription
+                        </p>
+                    }
+
+                    @* Meta Fields Row: CreatedAt, PrepTimeMinutes, Servings *@
+                    <div class="d-flex flex-wrap align-items-center gap-4 py-3 meta-row mb-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-calendar3 text-accent fs-5" aria-hidden="true"></i>
+                            <div>
+                                <span class="d-block small text-white-50">Added</span>
+                                <span class="text-white fw-medium">@_recipe.CreatedAt.ToString("MMM d, yyyy")</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-clock text-accent fs-5" aria-hidden="true"></i>
+                            <div>
+                                <span class="d-block small text-white-50">Prep Time</span>
+                                <span class="text-white fw-medium">@_recipe.PrepTimeMinutes mins</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-people text-accent fs-5" aria-hidden="true"></i>
+                            <div>
+                                <span class="d-block small text-white-50">Yields</span>
+                                <span class="text-white fw-medium">@_recipe.Servings @(_recipe.Servings == 1 ? "serving" :
+                                                  "servings")</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        @* Divider *@
+                        <hr class="recipe-divider my-4" />
+
+                        @* Two Columns: Ingredients (left) & Instructions (right) *@
+                        <div class="row g-4 g-lg-5">
+                            @* Left Column: Ingredients *@
+                            <div class="col-12 col-md-5 col-lg-4">
+                                <div class="ingredients-section">
+                                    <h4 class="text-white fw-bold mb-3 d-flex align-items-center gap-2">
+                                        <i class="bi bi-basket text-accent" aria-hidden="true"></i>
+                                        <span>Ingredients</span>
+                                    </h4>
+
+                                    @if (_recipe.Ingredients.Count == 0)
+                                    {
+                                        <p class="text-white-50 small mb-0">No ingredients specified.</p>
+                                    }
+                                    else
+                                    {
+                                        <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
+                                            @foreach (var item in _recipe.Ingredients)
+                                            {
+                                                <li
+                                                    class="ingredient-row d-flex align-items-center justify-content-between p-2 rounded">
+                                                    <span class="text-white">
+                                                        @(string.IsNullOrEmpty(item.Name) ? (item.Product?.Name ?? "Item") : item.Name)
+                                                        @if (item.IsOptional)
+                                                        {
+                                                            <span class="badge bg-secondary ms-1 small">optional</span>
+                                                        }
+                                                    </span>
+                                                    <span class="text-accent fw-semibold text-nowrap ms-2">
+                                                        @FormatQuantity(item.Quantity) @FormatUnit(item.Unit)
+                                                    </span>
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                </div>
+                            </div>
+
+                            @* Right Column: Instructions *@
+                            <div class="col-12 col-md-7 col-lg-8">
+                                <div class="instructions-section">
+                                    <h4 class="text-white fw-bold mb-3 d-flex align-items-center gap-2">
+                                        <i class="bi bi-journal-text text-accent" aria-hidden="true"></i>
+                                        <span>Instructions</span>
+                                    </h4>
+
+                                    <div class="instructions-content text-white-75">
+                                        @_recipe.Instructions
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            }
+
+        </div>
+    </section>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    [SupplyParameterFromQuery(Name = "returnUrl")]
+    public string? ReturnUrl { get; set; }
+
+    private string BackUrl => !string.IsNullOrWhiteSpace(ReturnUrl) ? ReturnUrl : "/recipes";
+
+    private string BackLabel => ReturnUrl switch
+    {
+        var url when !string.IsNullOrEmpty(url) && url.Contains("scope=family") => "Back to Family Recipes",
+        var url when !string.IsNullOrEmpty(url) && url.Contains("/workspace/recipes") => "Back to Saved Recipes",
+        _ => "Back to Recipes"
+    };
+
+    private Recipe? _recipe;
+    private User? _currentUser;
+    private bool _isLoading = true;
+    private bool _isBusy = false;
+    private bool _isUserBookmarked = false;
+    private bool _isFamilyBookmarked = false;
+    private bool _copiedLink = false;
+
+    private bool IsAuthor => _currentUser != null && _recipe?.CreatedByUserId == _currentUser.UserId;
+    private bool IsFamilyHead => _currentUser?.Role == UserRole.FamilyHead;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _isLoading = true;
+        _recipe = await RecipeService.GetRecipeByIdAsync(Id);
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var userIdStr = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (Guid.TryParse(userIdStr, out var userId))
+        {
+            _currentUser = await AuthRepository.GetUserByIdAsync(userId);
+            if (_currentUser is not null && _recipe is not null)
+            {
+                var savedEntries = await RecipeService.GetSavedRecipesForContextAsync(_recipe.RecipeId, _currentUser.UserId,
+_currentUser.FamilyId);
+                _isUserBookmarked = savedEntries.Any(s => s.UserId == _currentUser.UserId);
+                _isFamilyBookmarked = savedEntries.Any(s => s.FamilyId == _currentUser.FamilyId);
+            }
+        }
+
+        _isLoading = false;
+    }
+
+    private string GetPublicUrl()
+    {
+        return $"{Nav.BaseUri.TrimEnd('/')}/recipes/{Id}";
+    }
+
+    private async Task CopyPublicLinkAsync()
+    {
+        var url = GetPublicUrl();
+        await JS.InvokeAsync<bool>("copyToClipboard", url);
+        _copiedLink = true;
+        StateHasChanged();
+
+        await Task.Delay(2000);
+        _copiedLink = false;
+        StateHasChanged();
+    }
+
+    private async Task TogglePersonalBookmarkAsync()
+    {
+        if (_recipe is null || _currentUser is null || _isBusy) return;
+
+        try
+        {
+            _isBusy = true;
+            _isUserBookmarked = await RecipeService.ToggleBookmarkAsync(_recipe.RecipeId, _currentUser.UserId,
+_currentUser.FamilyId, "personal");
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    private async Task ToggleFamilyBookmarkAsync()
+    {
+        if (_recipe is null || _currentUser is null || !IsFamilyHead || _isBusy) return;
+
+        try
+        {
+            _isBusy = true;
+            _isFamilyBookmarked = await RecipeService.ToggleBookmarkAsync(_recipe.RecipeId, _currentUser.UserId,
+_currentUser.FamilyId, "family");
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    private async Task MakePublicAsync()
+    {
+        if (_recipe is null || _currentUser is null || !IsAuthor || _isBusy) return;
+
+        try
+        {
+            _isBusy = true;
+            var success = await RecipeService.MakeRecipePublicAsync(_recipe.RecipeId, _currentUser.UserId);
+            if (success)
+            {
+                _recipe.IsPublic = true;
+            }
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    private static string FormatQuantity(decimal qty)
+    {
+        return qty % 1 == 0 ? ((int)qty).ToString() : qty.ToString("0.##");
+    }
+
+    private static string FormatUnit(UnitEnum unit) => unit switch {
+        UnitEnum.Grams => "g",
+        UnitEnum.Milliliters => "ml",
+        UnitEnum.Pieces => "pcs",
+        UnitEnum.Cloves => "cloves",
+        UnitEnum.Sprigs => "sprigs",
+        UnitEnum.Pinch => "pinch",
+        UnitEnum.Tablespoons => "tbsp",
+        UnitEnum.Teaspoons => "tsp",
+        UnitEnum.Cups => "cups",
+        _ => unit.ToString().ToLowerInvariant()
+    };
+}

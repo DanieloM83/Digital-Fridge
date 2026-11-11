@@ -15,7 +15,43 @@ public class RecipeService : IRecipeService
     public async Task<IReadOnlyList<Recipe>> GetPublicRecipesAsync(string? searchQuery = null)
     {
         var recipes = await _recipeRepository.GetPublicRecipesAsync();
+        return FilterRecipes(recipes, searchQuery);
+    }
 
+    public async Task<IReadOnlyList<Recipe>> GetSavedRecipesAsync(Guid? userId, Guid? familyId, string? searchQuery = null)
+    {
+        var recipes = await _recipeRepository.GetSavedRecipesByContextAsync(userId, familyId);
+        return FilterRecipes(recipes, searchQuery);
+    }
+
+    public async Task<Recipe?> GetRecipeByIdAsync(Guid recipeId)
+    {
+        return await _recipeRepository.GetByIdAsync(recipeId);
+    }
+
+    public async Task<IReadOnlyList<SavedRecipe>> GetSavedRecipesForContextAsync(Guid recipeId, Guid? userId, Guid? familyId)
+    {
+        return await _recipeRepository.GetSavedRecipesAsync(recipeId, userId, familyId);
+    }
+
+    public async Task<bool> ToggleBookmarkAsync(Guid recipeId, Guid userId, Guid? familyId, string target)
+    {
+        if (target.Equals("family", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!familyId.HasValue) return false;
+            return await _recipeRepository.ToggleFamilyBookmarkAsync(recipeId, familyId.Value);
+        }
+
+        return await _recipeRepository.ToggleUserBookmarkAsync(recipeId, userId);
+    }
+
+    public async Task<bool> MakeRecipePublicAsync(Guid recipeId, Guid authorUserId)
+    {
+        return await _recipeRepository.MakeRecipePublicAsync(recipeId, authorUserId);
+    }
+
+    private static IReadOnlyList<Recipe> FilterRecipes(IReadOnlyList<Recipe> recipes, string? searchQuery)
+    {
         if (string.IsNullOrWhiteSpace(searchQuery))
         {
             return recipes;
@@ -39,10 +75,5 @@ public class RecipeService : IRecipeService
                 r.Ingredients.Any(i => i.Product != null && terms.Any(term => i.Product.Name.Contains(term, StringComparison.OrdinalIgnoreCase)))
             )
             .ToList();
-    }
-
-    public async Task<Recipe?> GetRecipeByIdAsync(Guid recipeId)
-    {
-        return await _recipeRepository.GetByIdAsync(recipeId);
     }
 }
