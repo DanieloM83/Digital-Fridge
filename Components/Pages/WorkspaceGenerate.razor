@@ -144,10 +144,14 @@
             _currentUser = await AuthRepository.GetUserByIdAsync(userId);
             if (_currentUser != null)
             {
-                _recentRecipes = await GenerationService.GetRecentGeneratedRecipesAsync(_currentUser.UserId);
-                if (_recentRecipes.Count > 0)
+                var session = await GenerationService.GetRecentSessionAsync(_currentUser.UserId);
+                if (session != null)
                 {
-                    _lastUserPrompt = "Recent suggestions from your ingredients";
+                    _lastUserPrompt = session.Prompt;
+                    _recentRecipes = session.Items
+                        .Where(i => i.Recipe != null)
+                        .Select(i => i.Recipe!)
+                        .ToList();
                 }
             }
         }
@@ -187,7 +191,11 @@
 
         try
         {
-            _recentRecipes = await GenerationService.GenerateRecipesAsync(_currentUser.UserId, promptToRun);
+            var session = await GenerationService.GenerateRecipesAsync(_currentUser.UserId, promptToRun);
+            _recentRecipes = session.Items
+                .Where(i => i.Recipe != null)
+                .Select(i => i.Recipe!)
+                .ToList();
         }
         finally
         {

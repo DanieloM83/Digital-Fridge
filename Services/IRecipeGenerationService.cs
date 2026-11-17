@@ -4,6 +4,6 @@ namespace Digital_Fridge.Services;
 
 public interface IRecipeGenerationService
 {
-    Task<IReadOnlyList<Recipe>> GetRecentGeneratedRecipesAsync(Guid userId);
-    Task<IReadOnlyList<Recipe>> GenerateRecipesAsync(Guid userId, string userPrompt);
+    Task<GeneratedRecipeSession?> GetRecentSessionAsync(Guid userId);
+    Task<GeneratedRecipeSession> GenerateRecipesAsync(Guid userId, string userPrompt);
 }
