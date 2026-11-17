@@ -1,14 +1,300 @@
+@*
+    WorkspaceStorage - Displays the user's family inventory grouped by product category.
+    Collapsible category headers with item editing via modal and deletion with confirmation.
+*@
+
 @page "/workspace/storage"
 @layout WorkspaceLayout
 @attribute [Authorize]
+@rendermode InteractiveServer
+
+@inject IStorageService StorageService
+@inject IAuthRepository AuthRepository
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JS
 
 <PageTitle>Storage - Workspace</PageTitle>
 
-<div class="container-fluid flex-grow-1 d-flex flex-column align-items-center justify-content-center text-white p-4">
-    <div class="text-center">
-        <i class="bi bi-shop-window text-accent display-4 mb-3 d-block" aria-hidden="true"></i>
-        <h2 class="fw-bold mb-2">Storage</h2>
-        <p class="text-white-50">Manage your fridge items, pantry stock, and expiration dates.</p>
-    </div>
-</div>
+<section class="workspace-storage-page py-4">
+    <div class="container pt-2 pb-5 storage-content-container">
 
+        @* Header & Quick Action *@
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+            <div>
+                <h1 class="storage-title fw-bold text-white mb-1">
+                    Current Inventory
+                </h1>
+                <p class="text-white-50 small mb-0">
+                    Track and manage groceries in your household fridge and pantry.
+                </p>
+            </div>
+
+            <button type="button" class="btn btn-accent d-inline-flex align-items-center gap-2" @onclick="OpenAddModal">
+                <i class="bi bi-patch-plus fs-5" aria-hidden="true"></i>
+                <span>Add Product</span>
+            </button>
+        </div>
+
+        @if (_isLoading)
+        {
+            <div class="d-flex justify-content-center py-5">
+                <div class="spinner-border text-accent" role="status">
+                    <span class="visually-hidden">Loading inventory...</span>
+                </div>
+            </div>
+        }
+        else if (_items.Count == 0)
+        {
+            <div class="glass-card text-center text-white py-5 px-4 empty-storage-card mx-auto my-5">
+                <i class="bi bi-shop-window display-4 text-accent mb-3 d-block" aria-hidden="true"></i>
+                <h3 class="fw-bold mb-2">Your fridge is empty</h3>
+                <p class="text-white-50 mb-4 small">
+                    Start stocking up! Add products manually to keep track of ingredients and expiration dates.
+                </p>
+                <button type="button" class="btn btn-accent" @onclick="OpenAddModal">
+                    <i class="bi bi-patch-plus me-1"></i>Add your first item
+                </button>
+            </div>
+        }
+        else
+        {
+            @* Category Groupings List *@
+            <div class="d-flex flex-column gap-3">
+                @foreach (var group in GroupedItems)
+                {
+                    var isCollapsed = _collapsedCategoryIds.Contains(group.CategoryId);
+                    var categoryName = group.CategoryName;
+
+                    <div class="glass-card storage-category-card overflow-hidden" @key="group.CategoryId">
+                        @* Collapsible Category Header *@
+                        <div class="category-header d-flex align-items-center justify-content-between p-3 px-md-4" role="button"
+                             tabindex="0" @onclick="() => ToggleCategory(group.CategoryId)">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="category-chevron @(isCollapsed ? "collapsed" : "")">
+                                    <i class="bi bi-chevron-down text-white fs-5"></i>
+                                </span>
+                                <h3 class="category-title mb-0">
+                                    @categoryName
+                                </h3>
+                                <span class="badge category-count-badge">
+                                    @group.Items.Count @(group.Items.Count == 1 ? "item" : "items")
+                                </span>
+                            </div>
+                        </div>
+
+                        @* Products List in Category *@
+                        @if (!isCollapsed)
+                        {
+                            <div class="category-items-container border-top border-white-10">
+                                @foreach (var item in group.Items)
+                                {
+                                    <div class="storage-item-row d-flex align-items-center justify-content-between p-3 px-md-4"
+                                         @key="item.FridgeItemId">
+                                        <div class="d-flex align-items-center gap-3 flex-grow-1">
+                                            <div class="item-info">
+                                                <div class="item-name fw-medium text-white">
+                                                    @(item.Product?.Name ?? "Unnamed Product")
+                                                </div>
+                                                <div class="item-meta small text-white-50 d-flex flex-wrap align-items-center gap-2">
+                                                    <span class="text-accent fw-semibold">
+                                                        @FormatQuantity(item.Quantity) @item.Unit
+                                                    </span>
+                                                    @if (item.ExpirationDate.HasValue)
+                                                    {
+                                                        <span class="text-white-25">•</span>
+                                                        <span class="@GetExpirationBadgeClass(item.ExpirationDate.Value)">
+                                                            <i class="bi bi-calendar-event me-1"></i>Exp:
+                                                            @item.ExpirationDate.Value.ToString("MMM d, yyyy")
+                                                        </span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        @* Action Buttons: Pencil & Red Trash Can *@
+                                        <div class="d-flex align-items-center gap-2 ms-3">
+                                            <button type="button" class="btn btn-icon-action btn-edit" title="Edit item"
+                                                    aria-label="Edit item" @onclick="() => OpenEditModal(item)">
+                                                <i class="bi bi-pencil" aria-hidden="true"></i>
+                                            </button>
+
+                                            <button type="button" class="btn btn-icon-action btn-delete text-danger" title="Delete item"
+                                                    aria-label="Delete item" @onclick="() => PromptDelete(item)">
+                                                <i class="bi bi-trash3" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+
+    </div>
+</section>
+
+@* Add/Edit Storage Item Modal *@
+<StorageItemModal ModalId="storageItemModal" IsEditMode="_isEditMode" Model="_formModel" Categories="_categories"
+                  OnSave="SaveItemAsync" />
+
+@* Confirmation Modal for Deletion *@
+<ConfirmationModal Id="deleteItemModal" Title="Delete Product" Icon="bi-trash3" ConfirmText="Delete"
+                   ConfirmButtonClass="btn-danger" OnConfirm="ConfirmDeleteAsync">
+    <p class="mb-0">
+        Are you sure you want to remove <strong class="text-white">@(_itemToDelete?.Product?.Name ?? "this product")</strong> from your storage?
+    </p>
+</ConfirmationModal>
+
+@code {
+    private bool _isLoading = true;
+    private User? _currentUser;
+    private IReadOnlyList<FridgeItem> _items = [];
+    private IReadOnlyList<ProductCategory> _categories = [];
+    private readonly HashSet<int> _collapsedCategoryIds = [];
+
+    // Edit/Add modal state
+    private bool _isEditMode;
+    private StorageItemModal.StorageItemFormModel _formModel = new();
+
+    // Delete modal state
+    private FridgeItem? _itemToDelete;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var userIdStr = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (Guid.TryParse(userIdStr, out var userId))
+        {
+            _currentUser = await AuthRepository.GetUserByIdAsync(userId);
+        }
+
+        _categories = await StorageService.GetCategoriesAsync();
+        await LoadInventoryAsync();
+    }
+
+    private async Task LoadInventoryAsync()
+    {
+        _isLoading = true;
+        if (_currentUser != null)
+        {
+            _items = await StorageService.GetFamilyFridgeItemsAsync(_currentUser.FamilyId);
+        }
+        _isLoading = false;
+    }
+
+    private IEnumerable<CategoryGroup> GroupedItems =>
+        _items
+            .GroupBy(i => i.Product?.Category?.CategoryId ?? 0)
+            .Select(g => new CategoryGroup(
+                g.Key,
+                g.FirstOrDefault()?.Product?.Category?.Name ?? "Uncategorized",
+                g.ToList()
+            ))
+            .OrderBy(g => g.CategoryName);
+
+    private void ToggleCategory(int categoryId)
+    {
+        if (!_collapsedCategoryIds.Add(categoryId))
+        {
+            _collapsedCategoryIds.Remove(categoryId);
+        }
+    }
+
+    private async Task OpenAddModal()
+    {
+        _isEditMode = false;
+        _formModel = new StorageItemModal.StorageItemFormModel {
+            CategoryId = _categories.FirstOrDefault()?.CategoryId ?? 0,
+            Unit = UnitEnum.Pieces,
+            Quantity = 1
+        };
+        await JS.InvokeVoidAsync("showModal", "storageItemModal");
+    }
+
+    private async Task OpenEditModal(FridgeItem item)
+    {
+        _isEditMode = true;
+        _formModel = new StorageItemModal.StorageItemFormModel {
+            FridgeItemId = item.FridgeItemId,
+            ProductId = item.ProductId,
+            Name = item.Product?.Name ?? string.Empty,
+            CategoryId = item.Product?.CategoryId ?? (_categories.FirstOrDefault()?.CategoryId ?? 0),
+            ProcessingLevel = item.Product?.ProcessingLevel,
+            Unit = item.Unit,
+            Quantity = item.Quantity,
+            ExpirationDate = item.ExpirationDate,
+            Barcode = item.Product?.Barcode
+        };
+        await JS.InvokeVoidAsync("showModal", "storageItemModal");
+    }
+
+    private async Task SaveItemAsync(StorageItemModal.StorageItemFormModel model)
+    {
+        if (_currentUser == null) return;
+
+        var fridgeItem = new FridgeItem {
+            FridgeItemId = model.FridgeItemId,
+            FamilyId = _currentUser.FamilyId,
+            ProductId = model.ProductId,
+            Quantity = model.Quantity,
+            Unit = model.Unit,
+            ExpirationDate = model.ExpirationDate,
+            EntryMethod = EntryMethod.Manual
+        };
+
+        var product = new Product {
+            ProductId = model.ProductId,
+            Name = model.Name,
+            CategoryId = model.CategoryId,
+            ProcessingLevel = model.ProcessingLevel,
+            DefaultUnit = model.Unit,
+            Barcode = model.Barcode
+        };
+
+        await StorageService.SaveFridgeItemAsync(fridgeItem, product);
+
+        // Hide modal via JS
+        await JS.InvokeVoidAsync("eval", "bootstrap.Modal.getInstance(document.getElementById('storageItemModal'))?.hide()");
+        await LoadInventoryAsync();
+    }
+
+    private async Task PromptDelete(FridgeItem item)
+    {
+        _itemToDelete = item;
+        await JS.InvokeVoidAsync("showModal", "deleteItemModal");
+    }
+
+    private async Task ConfirmDeleteAsync()
+    {
+        if (_itemToDelete != null)
+        {
+            await StorageService.DeleteFridgeItemAsync(_itemToDelete.FridgeItemId);
+            _itemToDelete = null;
+            await LoadInventoryAsync();
+        }
+    }
+
+    private static string FormatQuantity(decimal qty)
+    {
+        return qty % 1 == 0 ? ((int)qty).ToString() : qty.ToString("0.##");
+    }
+
+    private static string GetExpirationBadgeClass(DateOnly exp)
+    {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        if (exp < today)
+        {
+            return "text-danger fw-semibold";
+        }
+        if (exp <= today.AddDays(3))
+        {
+            return "text-warning fw-semibold";
+        }
+        return "text-white-50";
+    }
+
+    private record CategoryGroup(int CategoryId, string CategoryName, List<FridgeItem> Items);
+}

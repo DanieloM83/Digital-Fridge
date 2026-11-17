@@ -1,0 +1,77 @@
+@*
+    StorageItemModal - Modal dialog for adding or editing a fridge product manually.
+*@
+
+@using System.ComponentModel.DataAnnotations
+@using Digital_Fridge.Models.Enums
+
+<div class="modal fade" id="@ModalId" tabindex="-1" aria-labelledby="@($"{ModalId}Label")" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content modal-glass">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title text-white fw-bold" id="@($"{ModalId}Label")">
+                    <i class="bi @(IsEditMode ? "bi-pencil-square" : "bi-patch-plus") me-2 text-accent"
+                       aria-hidden="true"></i>
+                    @(IsEditMode ? "Edit Storage Item" : "Add Storage Item")
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body text-white pt-3">
+                <ProductFormFields Model="Model"
+                                   Categories="Categories"
+                                   NameError="@_nameError"
+                                   IdPrefix="modal_" />
+            </div>
+
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-accent px-4" @onclick="HandleSaveAsync">
+                    @(IsEditMode ? "Save Changes" : "Add to Storage")
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string ModalId { get; set; } = "storageItemModal";
+    [Parameter] public bool IsEditMode { get; set; }
+    [Parameter, EditorRequired] public StorageItemFormModel Model { get; set; } = new();
+    [Parameter] public IReadOnlyList<ProductCategory> Categories { get; set; } = [];
+    [Parameter] public EventCallback<StorageItemFormModel> OnSave { get; set; }
+
+    private string? _nameError;
+
+    private async Task HandleSaveAsync()
+    {
+        _nameError = null;
+        if (string.IsNullOrWhiteSpace(Model.Name))
+        {
+            _nameError = "Product name is required.";
+            return;
+        }
+
+        if (Model.CategoryId == 0 && Categories.Count > 0)
+        {
+            Model.CategoryId = Categories[0].CategoryId;
+        }
+
+        await OnSave.InvokeAsync(Model);
+    }
+
+    public class StorageItemFormModel
+    {
+        public Guid FridgeItemId { get; set; }
+        public Guid ProductId { get; set; }
+
+        public string Name { get; set; } = string.Empty;
+        public int CategoryId { get; set; }
+        public ProcessingLevel? ProcessingLevel { get; set; }
+        public UnitEnum Unit { get; set; } = UnitEnum.Pieces;
+        public decimal Quantity { get; set; } = 1;
+        public DateOnly? ExpirationDate { get; set; }
+        public string? Barcode { get; set; }
+    }
+}
