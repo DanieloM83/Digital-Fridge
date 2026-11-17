@@ -1,14 +1,351 @@
+@*
+    WorkspaceAddProduct - Add product page with Camera and Manual views.
+*@
+
 @page "/workspace/add-product"
 @layout WorkspaceLayout
 @attribute [Authorize]
+@rendermode InteractiveServer
+
+@using Digital_Fridge.Models.Enums
+@implements IAsyncDisposable
+
+@inject IStorageService StorageService
+@inject IAuthRepository AuthRepository
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IJSRuntime JS
 
 <PageTitle>Add Product - Workspace</PageTitle>
 
-<div class="container-fluid flex-grow-1 d-flex flex-column align-items-center justify-content-center text-white p-4">
-    <div class="text-center">
-        <i class="bi bi-patch-plus text-accent display-4 mb-3 d-block" aria-hidden="true"></i>
-        <h2 class="fw-bold mb-2">Add Product</h2>
-        <p class="text-white-50">Scan barcodes or add fresh groceries to your digital inventory.</p>
-    </div>
-</div>
+<section class="workspace-add-product-page d-flex flex-column flex-grow-1">
+    <div class="container add-product-container d-flex flex-column flex-grow-1">
 
+        @* Header & Mode Switcher Buttons *@
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3 add-product-header">
+            <div>
+                <h1 class="page-title fw-bold text-white mb-1">
+                    Add Product
+                </h1>
+                <p class="text-white-50 small mb-0">
+                    Scan items using your camera or enter details manually into your inventory.
+                </p>
+            </div>
+
+            @* Two Mode Switcher Buttons *@
+            <div class="mode-toggle-group d-inline-flex p-1">
+                <button type="button" class="btn mode-toggle-btn @(_currentMode == ViewMode.Camera ? "active" : "")"
+                        @onclick="() => SwitchModeAsync(ViewMode.Camera)">
+                    <i class="bi @(_currentMode == ViewMode.Camera ? "bi-camera-fill" : "bi-camera") me-1"
+                       aria-hidden="true"></i>
+                    <span>Camera</span>
+                </button>
+                <button type="button" class="btn mode-toggle-btn @(_currentMode == ViewMode.Manual ? "active" : "")"
+                        @onclick="() => SwitchModeAsync(ViewMode.Manual)">
+                    <i class="bi @(_currentMode == ViewMode.Manual ? "bi-pencil-fill" : "bi-pencil") me-1"
+                       aria-hidden="true"></i>
+                    <span>Manual</span>
+                </button>
+            </div>
+        </div>
+
+        @if (_isLoading)
+        {
+            <div class="d-flex justify-content-center align-items-center flex-grow-1 py-5">
+                <div class="spinner-border text-accent" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        }
+        else if (_currentMode == ViewMode.Camera)
+        {
+            @* CAMERA VIEW *@
+            <div class="camera-view-container flex-grow-1 d-flex flex-column position-relative overflow-hidden mb-2">
+                <div class="camera-viewport-wrapper flex-grow-1 position-relative w-100">
+                    <video @ref="_videoElement" id="cameraVideo" autoplay playsinline muted class="camera-video"></video>
+
+                    @if (_isCameraStarting)
+                    {
+                        <div class="camera-overlay d-flex flex-column align-items-center justify-content-center text-white">
+                            <div class="spinner-border text-accent mb-2" role="status"></div>
+                            <span class="small text-white-50">Requesting camera access...</span>
+                        </div>
+                    }
+                    else if (!string.IsNullOrEmpty(_cameraError))
+                    {
+                        <div class="camera-overlay d-flex flex-column align-items-center justify-content-center text-white p-3">
+                            <i class="bi bi-camera-video-off fs-1 text-warning mb-2"></i>
+                            <h6 class="fw-bold text-white mb-1">Camera Unavailable</h6>
+                            <p class="small text-white-50 mb-3 text-center">@_cameraError</p>
+                            <button type="button" class="btn btn-outline-light btn-sm" @onclick="StartCameraFeedAsync">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Try Again
+                            </button>
+                        </div>
+                    }
+
+                    @* Viewfinder reticle *@
+                    <div class="viewfinder-frame" aria-hidden="true"></div>
+
+                    @* Floating Action Button ON the video frame at the bottom *@
+                    <div class="camera-action-dock d-flex justify-content-center w-100">
+                        <button type="button"
+                                class="btn btn-camera-shutter d-inline-flex align-items-center gap-2 shadow"
+                                disabled="@(!_isCameraActive || _isProcessingPhoto)"
+                                @onclick="TakeSnapshotAsync">
+                            <i class="bi bi-camera fs-5" aria-hidden="true"></i>
+                            <span>@(_isProcessingPhoto ? "Processing..." : "Take photo")</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            @* MANUAL VIEW *@
+            <div class="glass-card manual-view-card p-4 p-md-5 mx-auto w-100 mb-4">
+                <h4 class="text-white fw-bold mb-4 d-flex align-items-center gap-2">
+                    <i class="bi bi-card-checklist text-accent" aria-hidden="true"></i>
+                    <span>Product Details</span>
+                </h4>
+
+                <ProductFormFields Model="_formModel" Categories="_categories" NameError="@_nameError" IdPrefix="page_" />
+
+                <div class="d-flex justify-content-end align-items-center gap-3 mt-4 pt-3 border-top border-white-10">
+                    <a href="/workspace/storage" class="btn btn-outline-light px-4">
+                        Cancel
+                    </a>
+                    <button type="button" class="btn btn-accent px-4 d-inline-flex align-items-center gap-2"
+                            disabled="@_isSaving" @onclick="SubmitManualFormAsync">
+                        @if (_isSaving)
+                        {
+                            <span class="spinner-border spinner-border-sm" role="status"></span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-check2-circle fs-5" aria-hidden="true"></i>
+                        }
+                        <span>Add product</span>
+                    </button>
+                </div>
+            </div>
+        }
+
+    </div>
+</section>
+
+@code {
+    private enum ViewMode
+    {
+        Camera,
+        Manual
+    }
+
+    private ViewMode _currentMode = ViewMode.Manual;
+    private bool _isLoading = true;
+    private bool _isSaving = false;
+    private bool _isCameraStarting = false;
+    private bool _isCameraActive = false;
+    private bool _isProcessingPhoto = false;
+    private string? _cameraError;
+    private string? _nameError;
+
+    private User? _currentUser;
+    private IReadOnlyList<ProductCategory> _categories = [];
+    private StorageItemModal.StorageItemFormModel _formModel = new();
+
+    private ElementReference _videoElement;
+    private IJSObjectReference? _jsModule;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // 1. Detect smartphone/tablet via User-Agent server-side
+        var userAgent = HttpContextAccessor.HttpContext?.Request.Headers["User-Agent"].ToString() ?? string.Empty;
+        var isMobileOrTablet = userAgent.Contains("Mobile", StringComparison.OrdinalIgnoreCase)
+                            || userAgent.Contains("Android", StringComparison.OrdinalIgnoreCase)
+                            || userAgent.Contains("iPhone", StringComparison.OrdinalIgnoreCase)
+                            || userAgent.Contains("iPad", StringComparison.OrdinalIgnoreCase);
+
+        _currentMode = isMobileOrTablet ? ViewMode.Camera : ViewMode.Manual;
+
+        // 2. Fetch authenticated user and categories
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var userIdStr = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (Guid.TryParse(userIdStr, out var userId))
+        {
+            _currentUser = await AuthRepository.GetUserByIdAsync(userId);
+        }
+
+        _categories = await StorageService.GetCategoriesAsync();
+        ResetForm();
+        _isLoading = false;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_currentMode == ViewMode.Camera && !_isCameraActive && !_isCameraStarting && string.IsNullOrEmpty(_cameraError))
+        {
+            await StartCameraFeedAsync();
+        }
+    }
+
+    private async Task SwitchModeAsync(ViewMode mode)
+    {
+        if (_currentMode == mode) return;
+
+        if (_currentMode == ViewMode.Camera)
+        {
+            await StopCameraFeedAsync();
+        }
+
+        _currentMode = mode;
+        _cameraError = null;
+
+        if (_currentMode == ViewMode.Camera)
+        {
+            StateHasChanged();
+        }
+    }
+
+    private async Task EnsureJsModuleAsync()
+    {
+        if (_jsModule is null)
+        {
+            _jsModule = await JS.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/WorkspaceAddProduct.razor.js");
+        }
+    }
+
+    private async Task StartCameraFeedAsync()
+    {
+        if (_isCameraStarting || _isCameraActive) return;
+
+        _isCameraStarting = true;
+        _cameraError = null;
+        StateHasChanged();
+
+        try
+        {
+            await EnsureJsModuleAsync();
+            if (_jsModule is not null)
+            {
+                var result = await _jsModule.InvokeAsync<CameraResult>("startCamera", _videoElement);
+                if (result.Success)
+                {
+                    _isCameraActive = true;
+                }
+                else
+                {
+                    _cameraError = result.Error ?? "Could not access camera.";
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _cameraError = ex.Message;
+        }
+        finally
+        {
+            _isCameraStarting = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task StopCameraFeedAsync()
+    {
+        try
+        {
+            if (_jsModule is not null)
+            {
+                await _jsModule.InvokeVoidAsync("stopCamera", _videoElement);
+            }
+            _isCameraActive = false;
+        }
+        catch
+        {
+            // Ignore on teardown
+        }
+    }
+
+    private async Task TakeSnapshotAsync()
+    {
+        if (!_isCameraActive || _jsModule is null) return;
+
+        _isProcessingPhoto = true;
+        StateHasChanged();
+
+        try
+        {
+            var base64Image = await _jsModule.InvokeAsync<string?>("capturePhoto", _videoElement);
+            // Snapshot captured; ready for CV model integration.
+            // For now, switch to manual form to complete addition.
+            await StopCameraFeedAsync();
+            _currentMode = ViewMode.Manual;
+        }
+        finally
+        {
+            _isProcessingPhoto = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ResetForm()
+    {
+        _formModel = new StorageItemModal.StorageItemFormModel {
+            CategoryId = _categories.FirstOrDefault()?.CategoryId ?? 0,
+            Unit = UnitEnum.Pieces,
+            Quantity = 1
+        };
+    }
+
+    private async Task SubmitManualFormAsync()
+    {
+        _nameError = null;
+        if (string.IsNullOrWhiteSpace(_formModel.Name))
+        {
+            _nameError = "Product name is required.";
+            return;
+        }
+
+        if (_currentUser == null) return;
+
+        if (_formModel.CategoryId == 0 && _categories.Count > 0)
+        {
+            _formModel.CategoryId = _categories[0].CategoryId;
+        }
+
+        _isSaving = true;
+
+        var fridgeItem = new FridgeItem {
+            FridgeItemId = Guid.NewGuid(),
+            FamilyId = _currentUser.FamilyId,
+            Quantity = _formModel.Quantity,
+            Unit = _formModel.Unit,
+            ExpirationDate = _formModel.ExpirationDate,
+            EntryMethod = EntryMethod.Manual
+        };
+
+        var product = new Product {
+            Name = _formModel.Name,
+            CategoryId = _formModel.CategoryId,
+            ProcessingLevel = _formModel.ProcessingLevel,
+            DefaultUnit = _formModel.Unit,
+            Barcode = _formModel.Barcode
+        };
+
+        await StorageService.SaveFridgeItemAsync(fridgeItem, product);
+        _isSaving = false;
+
+        Nav.NavigateTo("/workspace/storage");
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await StopCameraFeedAsync();
+        if (_jsModule is not null)
+        {
+            await _jsModule.DisposeAsync();
+        }
+    }
+
+    private record CameraResult(bool Success, string? Error);
+}

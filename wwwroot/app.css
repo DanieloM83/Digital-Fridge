@@ -39,3 +39,7 @@ h1:focus {
 .blazor-error-boundary::after {
     content: "An error has occurred.";
 }
+
+input::placeholder {
+    color: var(--dwf-text-muted) !important;
+}

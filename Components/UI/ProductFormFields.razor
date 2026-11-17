@@ -1,0 +1,151 @@
+@*
+    ProductFormFields - Reusable form inputs for Product and FridgeItem fields.
+    Used by StorageItemModal and WorkspaceAddProduct (Manual view).
+*@
+
+@using Digital_Fridge.Models.Enums
+
+<div class="row g-3">
+    @* Product Name *@
+    <div class="col-12 col-md-6">
+        <label for="@($"{IdPrefix}productName")" class="form-label small text-white-50 text-uppercase">
+            Product Name <span class="text-danger">*</span>
+        </label>
+        <input id="@($"{IdPrefix}productName")" type="text" class="form-control form-control-dark"
+               placeholder="e.g. Greek Yogurt, Tomatoes..." @bind="Model.Name" />
+        @if (!string.IsNullOrEmpty(NameError))
+        {
+            <span class="text-warning small">@NameError</span>
+        }
+    </div>
+
+    @* Category Dropdown with Search *@
+    <div class="col-12 col-md-6">
+        <label class="form-label small text-white-50 text-uppercase">
+            Category <span class="text-danger">*</span>
+        </label>
+        <div class="dropdown category-dropdown-wrapper">
+            <button class="form-control form-control-dark d-flex justify-content-between align-items-center text-start"
+                    type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                <span>@(SelectedCategoryName ?? "Select a category...")</span>
+                <i class="bi bi-chevron-down text-white-50 small"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-dark p-2 category-dropdown-menu w-100">
+                <div class="input-group input-group-sm mb-2">
+                    <span class="input-group-text bg-transparent border-secondary text-white-50">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" class="form-control bg-transparent border-secondary text-white"
+                           placeholder="Filter categories..." value="@_categoryFilter" @oninput="OnCategoryFilterInput" />
+                </div>
+                <div class="category-list-scrollable">
+                    @foreach (var cat in FilteredCategories)
+                    {
+                        <button type="button"
+                                class="dropdown-item d-flex align-items-center gap-2 py-2 rounded @(Model.CategoryId == cat.CategoryId ? "active" : "")"
+                                @onclick="() => SelectCategory(cat)">
+                            @if (!string.IsNullOrEmpty(cat.IconUrl))
+                            {
+                                <i class="bi @cat.IconUrl text-accent"></i>
+                            }
+                            <span>@cat.Name</span>
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* Quantity & Unit *@
+    <div class="col-12 col-md-6">
+        <label for="@($"{IdPrefix}itemQuantity")" class="form-label small text-white-50 text-uppercase">
+            Quantity <span class="text-danger">*</span>
+        </label>
+        <input id="@($"{IdPrefix}itemQuantity")" type="number" step="any" min="0.01"
+               class="form-control form-control-dark" @bind="Model.Quantity" />
+    </div>
+
+    <div class="col-12 col-md-6">
+        <label for="@($"{IdPrefix}itemUnit")" class="form-label small text-white-50 text-uppercase">
+            Measurement Unit <span class="text-danger">*</span>
+        </label>
+        <select id="@($"{IdPrefix}itemUnit")" class="form-select form-control-dark" @bind="Model.Unit">
+            @foreach (var unit in Enum.GetValues<UnitEnum>())
+            {
+                <option value="@unit">@unit</option>
+            }
+        </select>
+    </div>
+
+    @* Processing Level *@
+    <div class="col-12 col-md-6">
+        <label for="@($"{IdPrefix}processingLevel")" class="form-label small text-white-50 text-uppercase">
+            Processing Level
+        </label>
+        <select id="@($"{IdPrefix}processingLevel")" class="form-select form-control-dark"
+                @bind="Model.ProcessingLevel">
+            <option value="">None / Unspecified</option>
+            @foreach (var level in Enum.GetValues<ProcessingLevel>())
+            {
+                <option value="@level">@level</option>
+            }
+        </select>
+    </div>
+
+    @* Expiration Date *@
+    <div class="col-12 col-md-6">
+        <label for="@($"{IdPrefix}expirationDate")" class="form-label small text-white-50 text-uppercase">
+            Expiration Date
+        </label>
+        <input id="@($"{IdPrefix}expirationDate")" type="date" class="form-control form-control-dark"
+               value="@Model.ExpirationDate?.ToString("yyyy-MM-dd")" @onchange="OnDateChanged" />
+    </div>
+
+    @* Barcode *@
+    <div class="col-12">
+        <label for="@($"{IdPrefix}barcode")" class="form-label small text-white-50 text-uppercase">
+            Barcode (Optional)
+        </label>
+        <input id="@($"{IdPrefix}barcode")" type="text" class="form-control form-control-dark"
+               placeholder="e.g. 012345678905" @bind="Model.Barcode" />
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public StorageItemModal.StorageItemFormModel Model { get; set; } = default!;
+    [Parameter] public IReadOnlyList<ProductCategory> Categories { get; set; } = [];
+    [Parameter] public string? NameError { get; set; }
+    [Parameter] public string IdPrefix { get; set; } = string.Empty;
+
+    private string _categoryFilter = string.Empty;
+
+    private string? SelectedCategoryName =>
+        Categories.FirstOrDefault(c => c.CategoryId == Model.CategoryId)?.Name;
+
+    private IEnumerable<ProductCategory> FilteredCategories =>
+        string.IsNullOrWhiteSpace(_categoryFilter)
+            ? Categories
+            : Categories.Where(c => c.Name.Contains(_categoryFilter, StringComparison.OrdinalIgnoreCase));
+
+    private void OnCategoryFilterInput(ChangeEventArgs e)
+    {
+        _categoryFilter = e.Value?.ToString() ?? string.Empty;
+    }
+
+    private void SelectCategory(ProductCategory category)
+    {
+        Model.CategoryId = category.CategoryId;
+    }
+
+    private void OnDateChanged(ChangeEventArgs e)
+    {
+        if (DateOnly.TryParse(e.Value?.ToString(), out var date))
+        {
+            Model.ExpirationDate = date;
+        }
+        else
+        {
+            Model.ExpirationDate = null;
+        }
+    }
+}
