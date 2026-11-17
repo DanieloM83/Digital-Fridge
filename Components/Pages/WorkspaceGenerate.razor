@@ -1,14 +1,198 @@
+@*
+    WorkspaceGenerate - Recipe generation chat interface.
+    Scrollable chat block, user message on the right, 3 LLM recipe cards centered.
+    Bottom input dock above WorkspaceNavDash.
+*@
+
 @page "/workspace/generate"
 @layout WorkspaceLayout
 @attribute [Authorize]
+@rendermode InteractiveServer
+
+@inject IRecipeGenerationService GenerationService
+@inject IAuthRepository AuthRepository
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JS
 
 <PageTitle>Generate - Workspace</PageTitle>
 
-<div class="container-fluid flex-grow-1 d-flex flex-column align-items-center justify-content-center text-white p-4">
-    <div class="text-center">
-        <i class="bi bi-arrow-clockwise text-accent display-4 mb-3 d-block" aria-hidden="true"></i>
-        <h2 class="fw-bold mb-2">Generate Meals</h2>
-        <p class="text-white-50">Generate personalized recipe ideas using items currently in your fridge.</p>
-    </div>
-</div>
+<section class="workspace-generate-page d-flex flex-column flex-grow-1 position-relative">
+    @* Scrollable Chat Content Container *@
+    <div class="chat-scroll-container flex-grow-1 p-3 p-md-4">
+        <div class="chat-content-wrapper mx-auto d-flex flex-column gap-4">
 
+            @* Empty Welcome State (when no generation has been performed yet) *@
+            @if (!_isLoading && _recentRecipes.Count == 0 && string.IsNullOrEmpty(_lastUserPrompt) && !_isGenerating)
+            {
+                <div class="glass-card welcome-card text-center p-4 p-md-5 my-auto mx-auto text-white">
+                    <div class="welcome-icon-wrapper mb-3 mx-auto">
+                        <i class="bi bi-stars text-accent display-5" aria-hidden="true"></i>
+                    </div>
+                    <h2 class="fw-bold mb-2">Smart Recipe Assistant</h2>
+                    <p class="text-white-50 mx-auto welcome-subtitle">
+                        Tell me what you're craving, how much time you have, or let me inspire you with whatever ingredients
+                        you currently have stocked in your storage!
+                    </p>
+                    <div class="d-flex flex-wrap justify-content-center gap-2 mt-4 suggestion-chips">
+                        <button type="button" class="btn btn-outline-light btn-sm suggestion-btn"
+                                @onclick="@(() => SetPrompt("Quick 20-minute dinner using my fridge items"))">
+                            ⚡ Quick 20-min dinner
+                        </button>
+                        <button type="button" class="btn btn-outline-light btn-sm suggestion-btn"
+                                @onclick="@(() => SetPrompt("Warm cozy comfort food for today"))">
+                            🍲 Warm comfort food
+                        </button>
+                        <button type="button" class="btn btn-outline-light btn-sm suggestion-btn"
+                                @onclick="@(() => SetPrompt("Healthy high-protein meal"))">
+                            🥗 High-protein meal
+                        </button>
+                    </div>
+                </div>
+            }
+
+            @* User Message Bubble (Top Right) *@
+            @if (!string.IsNullOrEmpty(_lastUserPrompt))
+            {
+                <div class="user-message-wrapper d-flex justify-content-end">
+                    <div class="user-message-bubble d-flex align-items-start gap-2 shadow-sm">
+                        <div class="user-message-text">
+                            @_lastUserPrompt
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @* Loading State during Generation *@
+            @if (_isGenerating)
+            {
+                <div class="ai-response-wrapper d-flex flex-column align-items-center text-center my-4 py-4">
+                    <div class="spinner-border text-accent mb-3" role="status"></div>
+                    <h5 class="fw-bold text-white mb-1">Crafting tailored recipes...</h5>
+                    <p class="text-white-50 small mb-0">Analyzing ingredients and cooking techniques</p>
+                </div>
+            }
+            else if (_recentRecipes.Count > 0)
+            {
+                @* AI Response Block: Centered 3 Recipe Cards *@
+                <div class="ai-response-wrapper d-flex flex-column gap-3">
+                    <div class="d-flex align-items-center gap-2 text-white-50 small ai-meta-label">
+                        <i class="bi bi-stars text-accent fs-6"></i>
+                        <span>AI Generated Suggestions</span>
+                    </div>
+
+                    <div class="row row-cols-1 row-cols-md-3 g-3 justify-content-center">
+                        @foreach (var recipe in _recentRecipes)
+                        {
+                            <div class="col" @key="recipe.RecipeId">
+                                <RecipeCard Recipe="recipe" ReturnUrl="/workspace/generate" />
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+
+    @* Fixed Floating Input Bar Above WorkspaceNavDash *@
+    <div class="generate-input-dock">
+        <div class="container generate-input-container">
+            <form class="generate-input-form glass-card d-flex align-items-center p-2" @onsubmit="HandleSubmitAttempt"
+                  @onsubmit:preventDefault="true">
+                <i class="bi bi-stars text-accent fs-5 ms-3 me-2" aria-hidden="true"></i>
+
+                <input type="text" class="form-control generate-input-field text-white bg-transparent border-0"
+                       placeholder="Ask for recipe ideas, e.g. quick dinner with chicken and tomatoes..."
+                       value="@_currentPrompt" @oninput="(e => _currentPrompt = e.Value?.ToString() ?? string.Empty)"
+                       disabled="@_isGenerating" aria-label="Recipe prompt" />
+
+                <button type="submit"
+                        class="btn btn-accent btn-send-prompt d-flex align-items-center justify-content-center"
+                        disabled="@(string.IsNullOrWhiteSpace(_currentPrompt) || _isGenerating)"
+                        aria-label="Generate recipes">
+                    <i class="bi bi-arrow-up-circle-fill fs-4" aria-hidden="true"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+@* Confirmation Modal for replacing existing generated recipes *@
+<ConfirmationModal Id="confirmGenerationModal" Title="Generate New Recipes?" Icon="bi-exclamation-triangle"
+                   ConfirmText="Generate" ConfirmButtonClass="btn-accent" OnConfirm="ExecuteGenerationAsync">
+    <p class="mb-0">
+        Are you sure you want to create new recipes? If you already have recipes, they will be deleted! Make sure you've
+        saved them in your recipe book!
+    </p>
+</ConfirmationModal>
+
+@code {
+    private bool _isLoading = true;
+    private bool _isGenerating = false;
+    private string _currentPrompt = string.Empty;
+    private string _lastUserPrompt = string.Empty;
+    private IReadOnlyList<Recipe> _recentRecipes = [];
+    private User? _currentUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var userIdStr = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (Guid.TryParse(userIdStr, out var userId))
+        {
+            _currentUser = await AuthRepository.GetUserByIdAsync(userId);
+            if (_currentUser != null)
+            {
+                _recentRecipes = await GenerationService.GetRecentGeneratedRecipesAsync(_currentUser.UserId);
+                if (_recentRecipes.Count > 0)
+                {
+                    _lastUserPrompt = "Recent suggestions from your ingredients";
+                }
+            }
+        }
+
+        _isLoading = false;
+    }
+
+    private void SetPrompt(string prompt)
+    {
+        _currentPrompt = prompt;
+    }
+
+    private async Task HandleSubmitAttempt()
+    {
+        if (string.IsNullOrWhiteSpace(_currentPrompt) || _isGenerating) return;
+
+        // If there are existing recipes, confirm with the user first
+        if (_recentRecipes.Count > 0)
+        {
+            await JS.InvokeVoidAsync("showModal", "confirmGenerationModal");
+        }
+        else
+        {
+            await ExecuteGenerationAsync();
+        }
+    }
+
+    private async Task ExecuteGenerationAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_currentPrompt) || _currentUser == null) return;
+
+        var promptToRun = _currentPrompt.Trim();
+        _currentPrompt = string.Empty;
+        _lastUserPrompt = promptToRun;
+        _isGenerating = true;
+        StateHasChanged();
+
+        try
+        {
+            _recentRecipes = await GenerationService.GenerateRecipesAsync(_currentUser.UserId, promptToRun);
+        }
+        finally
+        {
+            _isGenerating = false;
+            StateHasChanged();
+        }
+    }
+}
