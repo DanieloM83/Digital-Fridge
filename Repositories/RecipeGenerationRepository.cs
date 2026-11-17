@@ -71,14 +71,12 @@ public class RecipeGenerationRepository : IRecipeGenerationRepository
         await context.SaveChangesAsync();
 
         // 4. Create new GeneratedRecipeSession
-        var newSession = new GeneratedRecipeSession
-        {
+        var newSession = new GeneratedRecipeSession {
             SessionId = Guid.NewGuid(),
             UserId = userId,
             Prompt = prompt.Trim(),
             CreatedAt = DateTime.UtcNow,
-            Items = recipes.Select(r => new GeneratedRecipe
-            {
+            Items = recipes.Select(r => new GeneratedRecipe {
                 GeneratedRecipeId = Guid.NewGuid(),
                 RecipeId = r.RecipeId
             }).ToList()

@@ -13,15 +13,13 @@ namespace Digital_Fridge.Migrations
         {
             migrationBuilder.CreateTable(
                 name: "GeneratedRecipeSessions",
-                columns: table => new
-                {
+                columns: table => new {
                     SessionId = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     Prompt = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_GeneratedRecipeSessions", x => x.SessionId);
                     table.ForeignKey(
                         name: "FK_GeneratedRecipeSessions_Users_UserId",
@@ -33,14 +31,12 @@ namespace Digital_Fridge.Migrations
 
             migrationBuilder.CreateTable(
                 name: "GeneratedRecipes",
-                columns: table => new
-                {
+                columns: table => new {
                     GeneratedRecipeId = table.Column<Guid>(type: "uuid", nullable: false),
                     SessionId = table.Column<Guid>(type: "uuid", nullable: false),
                     RecipeId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_GeneratedRecipes", x => x.GeneratedRecipeId);
                     table.ForeignKey(
                         name: "FK_GeneratedRecipes_GeneratedRecipeSessions_SessionId",
