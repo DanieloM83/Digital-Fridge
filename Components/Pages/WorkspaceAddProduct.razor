@@ -11,6 +11,7 @@
 @implements IAsyncDisposable
 
 @inject IStorageService StorageService
+@inject Digital_Fridge.Services.AI.IProductVisionService VisionService
 @inject IAuthRepository AuthRepository
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Nav
@@ -276,8 +277,26 @@
         try
         {
             var base64Image = await _jsModule.InvokeAsync<string?>("capturePhoto", _videoElement);
-            // Snapshot captured; ready for CV model integration.
-            // For now, switch to manual form to complete addition.
+            if (!string.IsNullOrEmpty(base64Image))
+            {
+                // Run vision analysis via swappable IProductVisionService
+                var analysis = await VisionService.AnalyzeProductImageAsync(base64Image, _categories);
+                if (analysis != null)
+                {
+                    var matchedCategory = _categories.FirstOrDefault(c =>
+                        string.Equals(c.Name, analysis.CategoryName, StringComparison.OrdinalIgnoreCase))
+                        ?? _categories.FirstOrDefault();
+
+                    _formModel.Name = analysis.Name;
+                    _formModel.CategoryId = matchedCategory?.CategoryId ?? _categories.FirstOrDefault()?.CategoryId ?? 0;
+                    _formModel.Quantity = analysis.Quantity;
+                    _formModel.Unit = analysis.Unit;
+                    _formModel.ProcessingLevel = analysis.ProcessingLevel;
+                    _formModel.ExpirationDate = analysis.EstimatedExpiration;
+                    _formModel.Barcode = analysis.Barcode;
+                }
+            }
+
             await StopCameraFeedAsync();
             _currentMode = ViewMode.Manual;
         }

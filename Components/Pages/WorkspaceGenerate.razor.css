@@ -1,0 +1,179 @@
+.workspace-generate-page {
+    height: 100%;
+    min-height: calc(100vh - 10.5rem);
+}
+
+/* Chat container with room at bottom for fixed input dock */
+.chat-scroll-container {
+    overflow-y: auto;
+    padding-bottom: 7.5rem !important; /* Clears floating input bar */
+}
+
+.chat-content-wrapper {
+    max-width: 980px;
+    width: 100%;
+}
+
+/* Welcome Card */
+.welcome-card {
+    max-width: 640px;
+    border-radius: 1.5rem;
+    background: var(--dwf-glass-bg);
+    border: 1px solid var(--dwf-glass-border);
+    backdrop-filter: blur(var(--dwf-glass-blur));
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.welcome-icon-wrapper {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(226, 149, 120, 0.15);
+    border: 1px solid rgba(226, 149, 120, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.welcome-subtitle {
+    max-width: 500px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.suggestion-btn {
+    border-radius: 2rem;
+    font-size: 0.85rem;
+    padding: 0.4rem 1rem;
+    transition: all var(--dwf-transition);
+}
+
+.suggestion-btn:hover {
+    background: rgba(226, 149, 120, 0.2);
+    border-color: var(--dwf-accent-warm);
+    color: var(--dwf-accent-warm);
+}
+
+/* User Message Bubble */
+.user-message-wrapper {
+    width: 100%;
+}
+
+.user-message-bubble {
+    max-width: 75%;
+    background: rgba(226, 149, 120, 0.2);
+    border: 1px solid rgba(226, 149, 120, 0.35);
+    border-radius: 1.25rem 1.25rem 0.25rem 1.25rem;
+    padding: 0.75rem 1.25rem;
+    color: #fff;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.user-message-text {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+.user-avatar-badge {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--dwf-accent-warm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+/* AI Response Block */
+.ai-response-wrapper {
+    width: 100%;
+}
+
+.ai-meta-label {
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+/* Fixed Floating Input Dock (above WorkspaceNavDash) */
+.generate-input-dock {
+    position: fixed;
+    bottom: 5.5rem; /* Sits right above WorkspaceNavDash */
+    left: 0;
+    right: 0;
+    z-index: 1015;
+    pointer-events: none;
+    padding: 0 1rem;
+}
+
+.generate-input-container {
+    max-width: 780px;
+    margin: 0 auto;
+}
+
+.generate-input-form {
+    pointer-events: auto;
+    background: rgba(26, 15, 10, 0.92);
+    border: 1px solid var(--dwf-glass-border);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 15px rgba(226, 149, 120, 0.15);
+    transition: border-color var(--dwf-transition), box-shadow var(--dwf-transition);
+}
+
+.generate-input-form:focus-within {
+    border-color: var(--dwf-accent-warm);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(226, 149, 120, 0.3);
+}
+
+.generate-input-field {
+    box-shadow: none !important;
+    font-size: 0.95rem;
+    color: #fff !important;
+}
+
+.generate-input-field::placeholder {
+    color: var(--dwf-text-muted);
+    font-size: 0.9rem;
+}
+
+.btn-send-prompt {
+    background: transparent;
+    border: none;
+    color: var(--dwf-accent-warm);
+    padding: 0.25rem 0.5rem;
+    border-radius: 50%;
+    transition: transform var(--dwf-transition), color var(--dwf-transition);
+}
+
+.btn-send-prompt:hover:not(:disabled) {
+    background: transparent;
+    color: #f3d2c1;
+    transform: scale(1.1);
+}
+
+.btn-send-prompt:disabled {
+    color: rgba(255, 255, 255, 0.25);
+    background: transparent;
+}
+
+.text-accent {
+    color: var(--dwf-accent-warm);
+}
+
+.btn-accent {
+    background-color: var(--dwf-accent-warm);
+    color: #1a0f0a;
+    border: none;
+    font-weight: 600;
+}
+
+.btn-accent:hover {
+    background-color: #d4836a;
+    color: #1a0f0a;
+}

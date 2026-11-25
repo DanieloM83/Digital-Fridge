@@ -18,6 +18,8 @@ public class AppDbContext : DbContext
     public DbSet<Recipe> Recipes => Set<Recipe>();
     public DbSet<RecipeIngredient> RecipeIngredients => Set<RecipeIngredient>();
     public DbSet<SavedRecipe> SavedRecipes => Set<SavedRecipe>();
+    public DbSet<GeneratedRecipeSession> GeneratedRecipeSessions => Set<GeneratedRecipeSession>();
+    public DbSet<GeneratedRecipe> GeneratedRecipes => Set<GeneratedRecipe>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -138,6 +140,27 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<SavedRecipe>(entity => {
             entity.HasIndex(sr => new { sr.RecipeId, sr.UserId });
             entity.HasIndex(sr => new { sr.RecipeId, sr.FamilyId });
+        });
+
+        modelBuilder.Entity<GeneratedRecipeSession>(entity => {
+            entity.HasIndex(s => s.UserId).IsUnique();
+
+            entity.HasOne(s => s.User)
+                  .WithMany()
+                  .HasForeignKey(s => s.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(s => s.Items)
+                  .WithOne(i => i.Session)
+                  .HasForeignKey(i => i.SessionId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<GeneratedRecipe>(entity => {
+            entity.HasOne(i => i.Recipe)
+                  .WithMany()
+                  .HasForeignKey(i => i.RecipeId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

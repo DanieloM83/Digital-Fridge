@@ -80,6 +80,52 @@ namespace Digital_Fridge.Migrations
                     b.ToTable("FridgeItems");
                 });
 
+            modelBuilder.Entity("Digital_Fridge.Models.GeneratedRecipe", b =>
+                {
+                    b.Property<Guid>("GeneratedRecipeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RecipeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("GeneratedRecipeId");
+
+                    b.HasIndex("RecipeId");
+
+                    b.HasIndex("SessionId");
+
+                    b.ToTable("GeneratedRecipes");
+                });
+
+            modelBuilder.Entity("Digital_Fridge.Models.GeneratedRecipeSession", b =>
+                {
+                    b.Property<Guid>("SessionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Prompt")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("SessionId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("GeneratedRecipeSessions");
+                });
+
             modelBuilder.Entity("Digital_Fridge.Models.Product", b =>
                 {
                     b.Property<Guid>("ProductId")
@@ -344,6 +390,36 @@ namespace Digital_Fridge.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Digital_Fridge.Models.GeneratedRecipe", b =>
+                {
+                    b.HasOne("Digital_Fridge.Models.Recipe", "Recipe")
+                        .WithMany()
+                        .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Digital_Fridge.Models.GeneratedRecipeSession", "Session")
+                        .WithMany("Items")
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Recipe");
+
+                    b.Navigation("Session");
+                });
+
+            modelBuilder.Entity("Digital_Fridge.Models.GeneratedRecipeSession", b =>
+                {
+                    b.HasOne("Digital_Fridge.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Digital_Fridge.Models.Product", b =>
                 {
                     b.HasOne("Digital_Fridge.Models.ProductCategory", "Category")
@@ -438,6 +514,11 @@ namespace Digital_Fridge.Migrations
                     b.Navigation("Members");
 
                     b.Navigation("SavedRecipes");
+                });
+
+            modelBuilder.Entity("Digital_Fridge.Models.GeneratedRecipeSession", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("Digital_Fridge.Models.Product", b =>
