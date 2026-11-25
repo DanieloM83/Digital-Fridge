@@ -57,7 +57,7 @@ public class GeminiProductVisionService : IProductVisionService
             var systemPrompt = $"You are an expert food inventory analyzer. Analyze this photo of a grocery/food item. Identify its name, best matching category from this list: [{categoryNames}], estimated quantity, most appropriate measurement unit (one of: Grams, Milliliters, Pieces, Cloves, Sprigs, Pinch, Tablespoons, Teaspoons, Cups), processing level (Raw, MinimallyProcessed, ModeratelyProcessed, HighlyProcessed), estimated expiration date (YYYY-MM-DD), and barcode number if visible.";
 
             // Gemini v1beta generateContent endpoint
-            var url = $"https://generativelanguage.googleapis.com/v1beta/models/{_modelName}:generateContent?key={_apiKey}";
+            var url = $"https://generativelanguage.googleapis.com/v1beta/models/{_modelName}:generateContent";
 
             var requestBody = new {
                 contents = new[]
