@@ -9,8 +9,7 @@ namespace Digital_Fridge;
 /// </summary>
 public static class LocalizationHelper
 {
-    public static string GetRoleLabel(IStringLocalizer<SharedResource> L, UserRole role) => role switch
-    {
+    public static string GetRoleLabel(IStringLocalizer<SharedResource> L, UserRole role) => role switch {
         UserRole.FamilyHead => L["Role_FamilyHead"],
         UserRole.FamilyMember => L["Role_FamilyMember"],
         UserRole.Admin => L["Role_Admin"],
@@ -20,8 +19,7 @@ public static class LocalizationHelper
     public static string GetUnitLabel(IStringLocalizer<SharedResource> L, UnitEnum unit, bool shortForm = false)
     {
         var prefix = shortForm ? "UnitShort_" : "Unit_";
-        return unit switch
-        {
+        return unit switch {
             UnitEnum.Grams => L[$"{prefix}Grams"],
             UnitEnum.Milliliters => L[$"{prefix}Milliliters"],
             UnitEnum.Pieces => L[$"{prefix}Pieces"],
@@ -35,16 +33,14 @@ public static class LocalizationHelper
         };
     }
 
-    public static string GetProcessingLevelLabel(IStringLocalizer<SharedResource> L, ProcessingLevel level) => level switch
-    {
+    public static string GetProcessingLevelLabel(IStringLocalizer<SharedResource> L, ProcessingLevel level) => level switch {
         ProcessingLevel.Raw => L["Processing_Raw"],
         ProcessingLevel.Processed => L["Processing_Processed"],
         ProcessingLevel.UltraProcessed => L["Processing_UltraProcessed"],
         _ => level.ToString()
     };
 
-    public static string GetCategoryLabel(IStringLocalizer<SharedResource> L, string categoryName) => categoryName switch
-    {
+    public static string GetCategoryLabel(IStringLocalizer<SharedResource> L, string categoryName) => categoryName switch {
         "Produce" => L["Category_Produce"],
         "Dairy & Eggs" => L["Category_DairyAndEggs"],
         "Meat & Poultry" => L["Category_MeatAndPoultry"],

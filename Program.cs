@@ -88,8 +88,7 @@ app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapControllers();
-app.MapGet("/api/culture/set", (string culture, string? redirectUri, HttpContext httpContext) =>
-{
+app.MapGet("/api/culture/set", (string culture, string? redirectUri, HttpContext httpContext) => {
     var normalized = culture == "en" ? "en" : "uk";
     httpContext.Response.Cookies.Append(
         Microsoft.AspNetCore.Localization.CookieRequestCultureProvider.DefaultCookieName,
