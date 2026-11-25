@@ -28,6 +28,7 @@ builder.Services.AddScoped<IRecipeGenerationRepository, RecipeGenerationReposito
 
 // AI Provider Adapters (Swappable with zero coupling to UI)
 builder.Services.AddScoped<Digital_Fridge.Services.AI.IProductVisionService, Digital_Fridge.Services.AI.GeminiProductVisionService>();
+builder.Services.AddScoped<Digital_Fridge.Services.AI.IRecipeImageGenerator, Digital_Fridge.Services.AI.GeminiRecipeImageGenerator>();
 builder.Services.AddScoped<Digital_Fridge.Services.AI.IRecipeAiGenerator, Digital_Fridge.Services.AI.GeminiRecipeAiGenerator>();
 
 // Core Business Services Layer

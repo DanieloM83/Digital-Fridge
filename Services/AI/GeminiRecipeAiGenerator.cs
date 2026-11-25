@@ -70,13 +70,17 @@ Verify: 3 recipes; no allergen conflicts; no ingredient beyond inventory + pantr
 times realistic; titles distinct; JSON valid; no commentary outside the JSON.
 """;
 
+    private readonly IRecipeImageGenerator _imageGenerator = null!;
+
     public GeminiRecipeAiGenerator(
         HttpClient httpClient,
         IConfiguration configuration,
+        IRecipeImageGenerator imageGenerator,
         ILogger<GeminiRecipeAiGenerator> logger)
     {
         _httpClient = httpClient;
         _httpClient.Timeout = TimeSpan.FromSeconds(300);
+        _imageGenerator = imageGenerator;
         _logger = logger;
         _apiKey = configuration["Gemini:ApiKey"]
                ?? configuration["GEMINI_API_KEY"]
@@ -185,7 +189,7 @@ times realistic; titles distinct; JSON valid; no commentary outside the JSON.
                 "https://images.unsplash.com/photo-1540420773420-3366772f4999?q=80&w=800&auto=format&fit=crop"
             };
 
-            return parsed.Select((dto, index) => new Recipe {
+            var recipes = parsed.Select((dto, index) => new Recipe {
                 RecipeId = Guid.NewGuid(),
                 CreatedByUserId = userId,
                 Title = dto.Title ?? "Chef's Special",
@@ -197,6 +201,21 @@ times realistic; titles distinct; JSON valid; no commentary outside the JSON.
                 Servings = dto.Servings > 0 ? dto.Servings : 2,
                 CreatedAt = DateTime.UtcNow
             }).ToList();
+
+            await Task.WhenAll(recipes.Select(async recipe =>
+            {
+                var generatedUrl = await _imageGenerator.GenerateRecipeImageAsync(
+                    recipe.RecipeId,
+                    recipe.Title,
+                    recipe.ShortDescription ?? string.Empty);
+
+                if (!string.IsNullOrWhiteSpace(generatedUrl))
+                {
+                    recipe.ImageUrl = generatedUrl;
+                }
+            }));
+
+            return recipes;
         }
         catch (OperationCanceledException ex)
         {
