@@ -13,7 +13,7 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Nav
 
-<PageTitle>Saved Recipes - Workspace</PageTitle>
+<PageTitle>@L["SavedRecipes_PageTitle"]</PageTitle>
 
 <section class="workspace-recipes-page py-4">
     <div class="container pt-2 pb-5">
@@ -21,12 +21,12 @@
         @* Header Section: Title, Subtitle, Scope Toggle, and Search *@
         <div class="text-center text-white mb-5 mx-auto recipes-header-section">
             <h1 class="recipes-title fw-bold mb-3">
-                Saved Recipes
+                @L["SavedRecipes_Title"]
             </h1>
             <p class="recipes-subtitle lead mb-4 mx-auto">
                 @(currentScope == RecipeScope.Personal
-                    ? "Your private bookmarks and personalized culinary discoveries."
-                    : "Recipes shared and saved across your household family.")
+                    ? L["SavedRecipes_SubtitlePersonal"]
+                    : L["SavedRecipes_SubtitleFamily"])
             </p>
 
             @* Scope Toggle: Personal / Family *@
@@ -34,12 +34,12 @@
                 <button type="button"
                         class="btn scope-toggle-btn @(currentScope == RecipeScope.Personal ? "active" : "")"
                         @onclick="() => SwitchScopeAsync(RecipeScope.Personal)">
-                    <i class="bi bi-person me-1" aria-hidden="true"></i>Personal
+                    <i class="bi bi-person me-1" aria-hidden="true"></i>@L["SavedRecipes_ScopePersonal"]
                 </button>
                 <button type="button"
                         class="btn scope-toggle-btn @(currentScope == RecipeScope.Family ? "active" : "")"
                         @onclick="() => SwitchScopeAsync(RecipeScope.Family)">
-                    <i class="bi bi-people me-1" aria-hidden="true"></i>Family
+                    <i class="bi bi-people me-1" aria-hidden="true"></i>@L["SavedRecipes_ScopeFamily"]
                 </button>
             </div>
 
@@ -47,10 +47,10 @@
             <div class="search-container mx-auto">
                 <SearchInput Value="@searchQuery"
                              ValueChanged="OnSearchChanged"
-                             Placeholder="Search saved recipes by ingredients or title..."
-                             AriaLabel="Search saved recipes by ingredients or title" />
+                             Placeholder="@L["SavedRecipes_SearchPlaceholder"]"
+                             AriaLabel="@L["SavedRecipes_SearchAria"]" />
                 <div class="form-text text-white-50 mt-2 small">
-                    Tip: Enter ingredients separated by commas to filter saved recipes by what you have
+                    @L["SavedRecipes_SearchTip"]
                 </div>
             </div>
         </div>
@@ -60,7 +60,7 @@
         {
             <div class="d-flex justify-content-center py-5">
                 <div class="spinner-border text-light" role="status">
-                    <span class="visually-hidden">Loading recipes...</span>
+                    <span class="visually-hidden">@L["Recipes_Loading"]</span>
                 </div>
             </div>
         }
@@ -70,25 +70,25 @@
                 <i class="bi @(string.IsNullOrWhiteSpace(searchQuery) ? (currentScope == RecipeScope.Personal ? "bi-bookmark" : "bi-bookmarks") : "bi-search") fs-1 text-accent mb-3 d-block" aria-hidden="true"></i>
                 <h3 class="fw-bold mb-2">
                     @(string.IsNullOrWhiteSpace(searchQuery)
-                        ? (currentScope == RecipeScope.Personal ? "No personal recipes saved yet" : "No family recipes saved yet")
-                        : "No matching saved recipes found")
+                        ? (currentScope == RecipeScope.Personal ? L["SavedRecipes_EmptyPersonalTitle"] : L["SavedRecipes_EmptyFamilyTitle"])
+                        : L["SavedRecipes_EmptySearchTitle"])
                 </h3>
                 <p class="text-white-50 mb-3 small">
                     @(string.IsNullOrWhiteSpace(searchQuery)
-                        ? "Browse our public recipes collection and bookmark the meals you would love to cook."
-                        : "Try adjusting your search terms or clearing the filter.")
+                        ? L["SavedRecipes_EmptyHint"]
+                        : L["SavedRecipes_EmptySearchHint"])
                 </p>
 
                 @if (string.IsNullOrWhiteSpace(searchQuery))
                 {
                     <a href="/recipes" class="btn btn-accent btn-sm">
-                        <i class="bi bi-book me-1"></i>Discover Public Recipes
+                        <i class="bi bi-book me-1"></i>@L["SavedRecipes_DiscoverPublic"]
                     </a>
                 }
                 else
                 {
                     <button class="btn btn-outline-light btn-sm" @onclick="ClearSearch">
-                        Show all @(currentScope == RecipeScope.Personal ? "personal" : "family") recipes
+                        @(currentScope == RecipeScope.Personal ? L["SavedRecipes_ShowAllPersonal"] : L["SavedRecipes_ShowAllFamily"])
                     </button>
                 }
             </div>

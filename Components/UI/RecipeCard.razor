@@ -16,12 +16,12 @@
             <h5 class="card-title fw-bold mb-2">@Recipe.Title</h5>
 
             <p class="card-text text-white-50 mb-3 small flex-grow-1">
-                @(Recipe.ShortDescription ?? "A mouth-watering dish crafted with fresh ingredients.")
+                @(Recipe.ShortDescription ?? L["RecipeCard_DefaultDescription"])
             </p>
 
             @if (Recipe.Ingredients.Count > 0)
             {
-                <div class="mb-3 d-flex flex-wrap gap-1" aria-label="Ingredients">
+                <div class="mb-3 d-flex flex-wrap gap-1" aria-label="@L["RecipeCard_IngredientsAria"]">
                     @foreach (var ingredient in Recipe.Ingredients)
                     {
                         <span class="badge ingredient-badge">@ingredient.Name</span>
@@ -32,11 +32,11 @@
             <div class="card-footer bg-transparent border-top border-white-10 d-flex justify-content-between align-items-center px-0 pt-3 pb-0 small text-white-50">
                 <span>
                     <i class="bi bi-clock me-1 text-accent" aria-hidden="true"></i>
-                    @Recipe.PrepTimeMinutes mins
+                    @L["Common_MinutesShort", Recipe.PrepTimeMinutes]
                 </span>
                 <span>
                     <i class="bi bi-people me-1 text-accent" aria-hidden="true"></i>
-                    @Recipe.Servings @(Recipe.Servings == 1 ? "serving" : "servings")
+                    @LocalizationHelper.FormatCount(L, Recipe.Servings, "Common_Serving_One", "Common_Serving_Few", "Common_Serving_Many")
                 </span>
             </div>
         </div>

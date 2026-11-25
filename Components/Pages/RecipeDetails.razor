@@ -12,7 +12,7 @@
 @inject NavigationManager Nav
 @inject IJSRuntime JS
 
-<PageTitle>@(_recipe?.Title ?? "Recipe Details") - Digital Web Fridge</PageTitle>
+<PageTitle>@(_recipe?.Title ?? L["RecipeDetails_PageTitleFallback"].Value) - Digital Web Fridge</PageTitle>
 
 <section class="recipe-details-page py-5">
     <div class="container pt-4 pb-5">
@@ -29,7 +29,7 @@
         {
             <div class="d-flex justify-content-center align-items-center py-5">
                 <div class="spinner-border text-accent" role="status">
-                    <span class="visually-hidden">Loading recipe...</span>
+                    <span class="visually-hidden">@L["RecipeDetails_Loading"]</span>
                 </div>
             </div>
         }
@@ -37,11 +37,11 @@
         {
             <div class="glass-card text-center text-white p-5 mx-auto not-found-card">
                 <i class="bi bi-exclamation-circle text-accent display-4 mb-3 d-block" aria-hidden="true"></i>
-                <h3 class="fw-bold mb-2">Recipe Not Found</h3>
+                <h3 class="fw-bold mb-2">@L["RecipeDetails_NotFoundTitle"]</h3>
                 <p class="text-white-50 mb-4">
-                    The recipe you are looking for does not exist or may have been removed.
+                    @L["RecipeDetails_NotFoundMessage"]
                 </p>
-                <a href="/recipes" class="btn btn-accent">Browse Public Recipes</a>
+                <a href="/recipes" class="btn btn-accent">@L["RecipeDetails_BrowsePublic"]</a>
             </div>
         }
         else
@@ -67,13 +67,13 @@
                             @if (_recipe.IsPublic && IsAuthor)
                             {
                                 <span class="public-recipe-link" @onclick="CopyPublicLinkAsync"
-                                      title="Click to copy public recipe link">
+                                      title="@L["RecipeDetails_CopyLinkTitle"]">
                                     <i class="bi bi-link-45deg me-1"></i>@GetPublicUrl()
                                 </span>
                                 @if (_copiedLink)
                                 {
                                     <span class="badge bg-success-subtle text-success border border-success-subtle small fade-in">
-                                        <i class="bi bi-check2 me-1"></i>Copied!
+                                        <i class="bi bi-check2 me-1"></i>@L["RecipeDetails_Copied"]
                                     </span>
                                 }
                             }
@@ -84,8 +84,8 @@
                             @* 1. Personal Bookmark Button *@
                             <button class="btn btn-action-icon @(_isUserBookmarked ? "active" : "")" type="button"
                                     disabled="@_isBusy" @onclick="TogglePersonalBookmarkAsync"
-                                    title="@(_isUserBookmarked ? "Remove from personal recipes" : "Add to personal recipes")"
-                                    aria-label="Personal bookmark">
+                                    title="@(_isUserBookmarked ? L["RecipeDetails_RemovePersonal"] : L["RecipeDetails_AddPersonal"])"
+                                    aria-label="@L["RecipeDetails_PersonalBookmarkAria"]">
                                 <i class="bi @(_isUserBookmarked ? "bi-bookmark-fill" : "bi-bookmark") fs-5"></i>
                             </button>
 
@@ -94,8 +94,8 @@
                             {
                                 <button class="btn btn-action-icon @(_isFamilyBookmarked ? "active" : "")" type="button"
                                         disabled="@_isBusy" @onclick="ToggleFamilyBookmarkAsync"
-                                        title="@(_isFamilyBookmarked ? "Remove from family recipes" : "Add to family recipes")"
-                                        aria-label="Family bookmark">
+                                        title="@(_isFamilyBookmarked ? L["RecipeDetails_RemoveFamily"] : L["RecipeDetails_AddFamily"])"
+                                        aria-label="@L["RecipeDetails_FamilyBookmarkAria"]">
                                     <i class="bi @(_isFamilyBookmarked ? "bi-bookmarks-fill" : "bi-bookmarks") fs-5"></i>
                                 </button>
                             }
@@ -104,9 +104,9 @@
                             @if (IsAuthor && !_recipe.IsPublic)
                             {
                                 <button class="btn btn-accent btn-sm d-inline-flex align-items-center gap-1" type="button"
-                                        disabled="@_isBusy" @onclick="MakePublicAsync" title="Make recipe publicly accessible">
+                                        disabled="@_isBusy" @onclick="MakePublicAsync" title="@L["RecipeDetails_MakePublicTitle"]">
                                     <i class="bi bi-share"></i>
-                                    <span>Share</span>
+                                    <span>@L["RecipeDetails_Share"]</span>
                                 </button>
                             }
                         </div>
@@ -129,25 +129,24 @@
                         <div class="d-flex align-items-center gap-2">
                             <i class="bi bi-calendar3 text-accent fs-5" aria-hidden="true"></i>
                             <div>
-                                <span class="d-block small text-white-50">Added</span>
-                                <span class="text-white fw-medium">@_recipe.CreatedAt.ToString("MMM d, yyyy")</span>
+                                <span class="d-block small text-white-50">@L["RecipeDetails_Added"]</span>
+                                <span class="text-white fw-medium">@_recipe.CreatedAt.ToString("MMM d, yyyy", System.Globalization.CultureInfo.CurrentUICulture)</span>
                             </div>
                         </div>
 
                         <div class="d-flex align-items-center gap-2">
                             <i class="bi bi-clock text-accent fs-5" aria-hidden="true"></i>
                             <div>
-                                <span class="d-block small text-white-50">Prep Time</span>
-                                <span class="text-white fw-medium">@_recipe.PrepTimeMinutes mins</span>
+                                <span class="d-block small text-white-50">@L["RecipeDetails_PrepTime"]</span>
+                                <span class="text-white fw-medium">@L["Common_MinutesShort", _recipe.PrepTimeMinutes]</span>
                             </div>
                         </div>
 
                         <div class="d-flex align-items-center gap-2">
                             <i class="bi bi-people text-accent fs-5" aria-hidden="true"></i>
                             <div>
-                                <span class="d-block small text-white-50">Yields</span>
-                                <span class="text-white fw-medium">@_recipe.Servings @(_recipe.Servings == 1 ? "serving" :
-                                                  "servings")</span>
+                                <span class="d-block small text-white-50">@L["RecipeDetails_Yields"]</span>
+                                <span class="text-white fw-medium">@LocalizationHelper.FormatCount(L, _recipe.Servings, "Common_Serving_One", "Common_Serving_Few", "Common_Serving_Many")</span>
                                 </div>
                             </div>
                         </div>
@@ -162,12 +161,12 @@
                                 <div class="ingredients-section">
                                     <h4 class="text-white fw-bold mb-3 d-flex align-items-center gap-2">
                                         <i class="bi bi-basket text-accent" aria-hidden="true"></i>
-                                        <span>Ingredients</span>
+                                        <span>@L["RecipeDetails_Ingredients"]</span>
                                     </h4>
 
                                     @if (_recipe.Ingredients.Count == 0)
                                     {
-                                        <p class="text-white-50 small mb-0">No ingredients specified.</p>
+                                        <p class="text-white-50 small mb-0">@L["RecipeDetails_NoIngredients"]</p>
                                     }
                                     else
                                     {
@@ -177,14 +176,14 @@
                                                 <li
                                                     class="ingredient-row d-flex align-items-center justify-content-between p-2 rounded">
                                                     <span class="text-white">
-                                                        @(string.IsNullOrEmpty(item.Name) ? (item.Product?.Name ?? "Item") : item.Name)
+                                                        @(string.IsNullOrEmpty(item.Name) ? (item.Product?.Name ?? L["RecipeDetails_DefaultItemName"].Value) : item.Name)
                                                         @if (item.IsOptional)
                                                         {
-                                                            <span class="badge bg-secondary ms-1 small">optional</span>
+                                                            <span class="badge bg-secondary ms-1 small">@L["RecipeDetails_Optional"]</span>
                                                         }
                                                     </span>
                                                     <span class="text-accent fw-semibold text-nowrap ms-2">
-                                                        @FormatQuantity(item.Quantity) @FormatUnit(item.Unit)
+                                                        @FormatQuantity(item.Quantity) @LocalizationHelper.GetUnitLabel(L, item.Unit, shortForm: true)
                                                     </span>
                                                 </li>
                                             }
@@ -198,7 +197,7 @@
                                 <div class="instructions-section">
                                     <h4 class="text-white fw-bold mb-3 d-flex align-items-center gap-2">
                                         <i class="bi bi-journal-text text-accent" aria-hidden="true"></i>
-                                        <span>Instructions</span>
+                                        <span>@L["RecipeDetails_Instructions"]</span>
                                     </h4>
 
                                     <div class="instructions-content text-white-75">
@@ -226,9 +225,9 @@
 
     private string BackLabel => ReturnUrl switch
     {
-        var url when !string.IsNullOrEmpty(url) && url.Contains("scope=family") => "Back to Family Recipes",
-        var url when !string.IsNullOrEmpty(url) && url.Contains("/workspace/recipes") => "Back to Saved Recipes",
-        _ => "Back to Recipes"
+        var url when !string.IsNullOrEmpty(url) && url.Contains("scope=family") => L["RecipeDetails_BackToFamily"],
+        var url when !string.IsNullOrEmpty(url) && url.Contains("/workspace/recipes") => L["RecipeDetails_BackToSaved"],
+        _ => L["RecipeDetails_BackToRecipes"]
     };
 
     private Recipe? _recipe;
@@ -337,17 +336,4 @@ _currentUser.FamilyId, "family");
     {
         return qty % 1 == 0 ? ((int)qty).ToString() : qty.ToString("0.##");
     }
-
-    private static string FormatUnit(UnitEnum unit) => unit switch {
-        UnitEnum.Grams => "g",
-        UnitEnum.Milliliters => "ml",
-        UnitEnum.Pieces => "pcs",
-        UnitEnum.Cloves => "cloves",
-        UnitEnum.Sprigs => "sprigs",
-        UnitEnum.Pinch => "pinch",
-        UnitEnum.Tablespoons => "tbsp",
-        UnitEnum.Teaspoons => "tsp",
-        UnitEnum.Cups => "cups",
-        _ => unit.ToString().ToLowerInvariant()
-    };
 }

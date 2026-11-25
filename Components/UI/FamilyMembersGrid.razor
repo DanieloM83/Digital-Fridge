@@ -7,18 +7,18 @@
 
 <div class="glass-card p-4">
     <h6 class="text-white-50 small text-uppercase mb-3">
-        Family members (@Family.Members.Count)
+        @L["FamilyGrid_Title", Family.Members.Count]
     </h6>
     <div class="table-responsive">
         <table class="table table-dark table-hover members-table mb-0">
             <thead>
                 <tr>
-                    <th>User</th>
-                    <th>Role</th>
-                    <th>Joined</th>
+                    <th>@L["FamilyGrid_ColUser"]</th>
+                    <th>@L["FamilyGrid_ColRole"]</th>
+                    <th>@L["FamilyGrid_ColJoined"]</th>
                     @if (IsHead)
                     {
-                        <th>Action</th>
+                        <th>@L["FamilyGrid_ColAction"]</th>
                     }
                 </tr>
             </thead>
@@ -34,11 +34,11 @@
                         </td>
                         <td>
                             <span class="badge @RoleBadgeClass(member.Role)">
-                                @GetRoleLabel(member.Role)
+                                @LocalizationHelper.GetRoleLabel(L, member.Role)
                             </span>
                         </td>
                         <td class="text-white-50 small align-middle">
-                            @member.JoinedAt.ToLocalTime().ToString("MMM d, yyyy")
+                            @member.JoinedAt.ToLocalTime().ToString("MMM d, yyyy", System.Globalization.CultureInfo.CurrentUICulture)
                         </td>
                         @if (IsHead)
                         {
@@ -47,7 +47,7 @@
                                 {
                                     <button class="btn btn-outline-danger btn-sm"
                                             @onclick="() => OpenKickModal(member)">
-                                        <i class="bi bi-person-x me-1" aria-hidden="true"></i>Kick
+                                        <i class="bi bi-person-x me-1" aria-hidden="true"></i>@L["FamilyGrid_Kick"]
                                     </button>
                                 }
                             </td>
@@ -61,14 +61,14 @@
 
 @* Kick confirmation modal scoped directly inside the grid *@
 <ConfirmationModal Id="kickModal"
-                   Title="Are you sure?"
+                   Title="@L["Common_ConfirmTitle"]"
                    Icon="bi-person-x"
-                   ConfirmText="Kick"
+                   ConfirmText="@L["FamilyGrid_Kick"]"
                    ConfirmButtonClass="btn-danger"
                    OnConfirm="KickMemberAsync">
     <p class="mb-0">
         <strong class="text-white">@(_kickTarget?.FullName ?? _kickTarget?.Email)</strong>
-        will be removed from your family and placed in their own household.
+        @L["FamilyGrid_KickMessageSuffix"]
     </p>
 </ConfirmationModal>
 
@@ -93,14 +93,6 @@
         _kickTarget = null;
         await OnFamilyUpdated.InvokeAsync();
     }
-
-    private static string GetRoleLabel(UserRole role) => role switch
-    {
-        UserRole.FamilyHead => "Family Head",
-        UserRole.FamilyMember => "Family Member",
-        UserRole.Admin => "Admin",
-        _ => "Guest"
-    };
 
     private static string RoleBadgeClass(UserRole role) => role switch
     {

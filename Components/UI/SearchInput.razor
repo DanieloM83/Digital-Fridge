@@ -3,6 +3,10 @@
     clear button, and consistent glassmorphic styling across pages.
 *@
 
+@{
+    var effectivePlaceholder = Placeholder ?? L["Common_SearchPlaceholder"].Value;
+}
+
 <div class="search-input-wrapper @AdditionalClass">
     <div class="input-group search-input-group">
         @if (!string.IsNullOrEmpty(LeadingIcon))
@@ -13,11 +17,11 @@
         }
 
         <input type="text" class="form-control search-input-control" value="@Value" @oninput="HandleInput"
-               placeholder="@Placeholder" aria-label="@(AriaLabel ?? Placeholder)" />
+               placeholder="@effectivePlaceholder" aria-label="@(AriaLabel ?? effectivePlaceholder)" />
 
         @if (ShowClearButton && !string.IsNullOrEmpty(Value))
         {
-            <button class="btn search-clear-btn" type="button" @onclick="ClearAsync" aria-label="Clear search">
+            <button class="btn search-clear-btn" type="button" @onclick="ClearAsync" aria-label="@L["Common_ClearSearch"]">
                 <i class="bi bi-x-circle-fill" aria-hidden="true"></i>
             </button>
         }
@@ -32,7 +36,7 @@
     public EventCallback<string> ValueChanged { get; set; }
 
     [Parameter]
-    public string Placeholder { get; set; } = "Search...";
+    public string? Placeholder { get; set; }
 
     [Parameter]
     public string? LeadingIcon { get; set; } = "bi-search";

@@ -1,17 +1,17 @@
 @page "/Error"
 @using System.Diagnostics
 
-<PageTitle>Error - Digital Web Fridge</PageTitle>
+<PageTitle>@L["Error_PageTitle"]</PageTitle>
 
 <section class="error-hero d-flex align-items-center justify-content-center">
-    <ErrorCard Title="Something went wrong."
-               Message="An unexpected error occurred while processing your request. Please try again later." />
+    <ErrorCard Title="@L["Error_Title"]"
+               Message="@L["Error_Message"]" />
 </section>
 
 @if (ShowRequestId)
 {
     <div class="text-center py-2">
-        <small class="text-white-50">Request ID: <code>@RequestId</code></small>
+        <small class="text-white-50">@L["Error_RequestId"] <code>@RequestId</code></small>
     </div>
 }
 
