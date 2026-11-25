@@ -16,6 +16,8 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddControllers();
 
+builder.Services.AddHttpClient();
+
 // Database & Persistence Layer
 builder.Services.AddPostgresDbContext(builder.Configuration);
 builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
@@ -23,6 +25,10 @@ builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IFamilyRepository, FamilyRepository>();
 builder.Services.AddScoped<IStorageRepository, StorageRepository>();
 builder.Services.AddScoped<IRecipeGenerationRepository, RecipeGenerationRepository>();
+
+// AI Provider Adapters (Swappable with zero coupling to UI)
+builder.Services.AddScoped<Digital_Fridge.Services.AI.IProductVisionService, Digital_Fridge.Services.AI.GeminiProductVisionService>();
+builder.Services.AddScoped<Digital_Fridge.Services.AI.IRecipeAiGenerator, Digital_Fridge.Services.AI.GeminiRecipeAiGenerator>();
 
 // Core Business Services Layer
 builder.Services.AddScoped<IRecipeService, RecipeService>();
