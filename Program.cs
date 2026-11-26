@@ -61,6 +61,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
 var app = builder.Build();
 
@@ -74,12 +75,32 @@ if (!app.Environment.IsDevelopment())
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
+var supportedCultures = new[] { "uk", "en" };
+var localizationOptions = new RequestLocalizationOptions()
+    .SetDefaultCulture("uk")
+    .AddSupportedCultures(supportedCultures)
+    .AddSupportedUICultures(supportedCultures);
+app.UseRequestLocalization(localizationOptions);
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapControllers();
+app.MapGet("/api/culture/set", (string culture, string? redirectUri, HttpContext httpContext) => {
+    var normalized = culture == "en" ? "en" : "uk";
+    httpContext.Response.Cookies.Append(
+        Microsoft.AspNetCore.Localization.CookieRequestCultureProvider.DefaultCookieName,
+        Microsoft.AspNetCore.Localization.CookieRequestCultureProvider.MakeCookieValue(
+            new Microsoft.AspNetCore.Localization.RequestCulture(normalized)),
+        new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1), IsEssential = true });
+
+    var target = !string.IsNullOrWhiteSpace(redirectUri) && Uri.TryCreate(redirectUri, UriKind.Relative, out _)
+        ? redirectUri
+        : "/";
+    return Results.LocalRedirect(target);
+});
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
@@ -95,3 +116,5 @@ catch (Exception ex)
 }
 
 app.Run();
+
+public partial class Program { }

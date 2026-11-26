@@ -18,7 +18,7 @@
 @inject IHttpContextAccessor HttpContextAccessor
 @inject IJSRuntime JS
 
-<PageTitle>Add Product - Workspace</PageTitle>
+<PageTitle>@L["AddProduct_PageTitle"]</PageTitle>
 
 <section class="workspace-add-product-page d-flex flex-column flex-grow-1">
     <div class="container add-product-container d-flex flex-column flex-grow-1">
@@ -27,10 +27,10 @@
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3 add-product-header">
             <div>
                 <h1 class="page-title fw-bold text-white mb-1">
-                    Add Product
+                    @L["AddProduct_Title"]
                 </h1>
                 <p class="text-white-50 small mb-0">
-                    Scan items using your camera or enter details manually into your inventory.
+                    @L["AddProduct_Subtitle"]
                 </p>
             </div>
 
@@ -40,13 +40,13 @@
                         @onclick="() => SwitchModeAsync(ViewMode.Camera)">
                     <i class="bi @(_currentMode == ViewMode.Camera ? "bi-camera-fill" : "bi-camera") me-1"
                        aria-hidden="true"></i>
-                    <span>Camera</span>
+                    <span>@L["AddProduct_ModeCamera"]</span>
                 </button>
                 <button type="button" class="btn mode-toggle-btn @(_currentMode == ViewMode.Manual ? "active" : "")"
                         @onclick="() => SwitchModeAsync(ViewMode.Manual)">
                     <i class="bi @(_currentMode == ViewMode.Manual ? "bi-pencil-fill" : "bi-pencil") me-1"
                        aria-hidden="true"></i>
-                    <span>Manual</span>
+                    <span>@L["AddProduct_ModeManual"]</span>
                 </button>
             </div>
         </div>
@@ -55,7 +55,7 @@
         {
             <div class="d-flex justify-content-center align-items-center flex-grow-1 py-5">
                 <div class="spinner-border text-accent" role="status">
-                    <span class="visually-hidden">Loading...</span>
+                    <span class="visually-hidden">@L["Common_Loading"]</span>
                 </div>
             </div>
         }
@@ -70,17 +70,17 @@
                     {
                         <div class="camera-overlay d-flex flex-column align-items-center justify-content-center text-white">
                             <div class="spinner-border text-accent mb-2" role="status"></div>
-                            <span class="small text-white-50">Requesting camera access...</span>
+                            <span class="small text-white-50">@L["AddProduct_CameraStarting"]</span>
                         </div>
                     }
                     else if (!string.IsNullOrEmpty(_cameraError))
                     {
                         <div class="camera-overlay d-flex flex-column align-items-center justify-content-center text-white p-3">
                             <i class="bi bi-camera-video-off fs-1 text-warning mb-2"></i>
-                            <h6 class="fw-bold text-white mb-1">Camera Unavailable</h6>
+                            <h6 class="fw-bold text-white mb-1">@L["AddProduct_CameraUnavailable"]</h6>
                             <p class="small text-white-50 mb-3 text-center">@_cameraError</p>
                             <button type="button" class="btn btn-outline-light btn-sm" @onclick="StartCameraFeedAsync">
-                                <i class="bi bi-arrow-clockwise me-1"></i>Try Again
+                                <i class="bi bi-arrow-clockwise me-1"></i>@L["AddProduct_TryAgain"]
                             </button>
                         </div>
                     }
@@ -95,7 +95,7 @@
                                 disabled="@(!_isCameraActive || _isProcessingPhoto)"
                                 @onclick="TakeSnapshotAsync">
                             <i class="bi bi-camera fs-5" aria-hidden="true"></i>
-                            <span>@(_isProcessingPhoto ? "Processing..." : "Take photo")</span>
+                            <span>@(_isProcessingPhoto ? L["AddProduct_Processing"] : L["AddProduct_TakePhoto"])</span>
                         </button>
                     </div>
                 </div>
@@ -107,14 +107,14 @@
             <div class="glass-card manual-view-card p-4 p-md-5 mx-auto w-100 mb-4">
                 <h4 class="text-white fw-bold mb-4 d-flex align-items-center gap-2">
                     <i class="bi bi-card-checklist text-accent" aria-hidden="true"></i>
-                    <span>Product Details</span>
+                    <span>@L["AddProduct_ProductDetails"]</span>
                 </h4>
 
                 <ProductFormFields Model="_formModel" Categories="_categories" NameError="@_nameError" IdPrefix="page_" />
 
                 <div class="d-flex justify-content-end align-items-center gap-3 mt-4 pt-3 border-top border-white-10">
                     <a href="/workspace/storage" class="btn btn-outline-light px-4">
-                        Cancel
+                        @L["Common_Cancel"]
                     </a>
                     <button type="button" class="btn btn-accent px-4 d-inline-flex align-items-center gap-2"
                             disabled="@_isSaving" @onclick="SubmitManualFormAsync">
@@ -126,7 +126,7 @@
                         {
                             <i class="bi bi-check2-circle fs-5" aria-hidden="true"></i>
                         }
-                        <span>Add product</span>
+                        <span>@L["AddProduct_SubmitButton"]</span>
                     </button>
                 </div>
             </div>
@@ -236,7 +236,7 @@
                 }
                 else
                 {
-                    _cameraError = result.Error ?? "Could not access camera.";
+                    _cameraError = MapCameraError(result.Error);
                 }
             }
         }
@@ -321,7 +321,7 @@
         _nameError = null;
         if (string.IsNullOrWhiteSpace(_formModel.Name))
         {
-            _nameError = "Product name is required.";
+            _nameError = L["ProductForm_NameRequired"];
             return;
         }
 
@@ -365,6 +365,15 @@
             await _jsModule.DisposeAsync();
         }
     }
+
+    private string MapCameraError(string? error) => error switch
+    {
+        "VIDEO_NOT_FOUND" => L["AddProduct_CameraErrorVideoNotFound"],
+        "CAMERA_NOT_SUPPORTED" => L["AddProduct_CameraErrorNotSupported"],
+        "PERMISSION_DENIED" => L["AddProduct_CameraErrorPermissionDenied"],
+        null or "" => L["AddProduct_CameraErrorDefault"],
+        _ => error
+    };
 
     private record CameraResult(bool Success, string? Error);
 }

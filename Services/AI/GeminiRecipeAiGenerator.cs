@@ -202,8 +202,7 @@ times realistic; titles distinct; JSON valid; no commentary outside the JSON.
                 CreatedAt = DateTime.UtcNow
             }).ToList();
 
-            await Task.WhenAll(recipes.Select(async recipe =>
-            {
+            await Task.WhenAll(recipes.Select(async recipe => {
                 var generatedUrl = await _imageGenerator.GenerateRecipeImageAsync(
                     recipe.RecipeId,
                     recipe.Title,

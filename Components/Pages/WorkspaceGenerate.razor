@@ -14,7 +14,7 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IJSRuntime JS
 
-<PageTitle>Generate - Workspace</PageTitle>
+<PageTitle>@L["Generate_PageTitle"]</PageTitle>
 
 <section class="workspace-generate-page d-flex flex-column flex-grow-1 position-relative">
     @* Scrollable Chat Content Container *@
@@ -28,23 +28,22 @@
                     <div class="welcome-icon-wrapper mb-3 mx-auto">
                         <i class="bi bi-stars text-accent display-5" aria-hidden="true"></i>
                     </div>
-                    <h2 class="fw-bold mb-2">Smart Recipe Assistant</h2>
+                    <h2 class="fw-bold mb-2">@L["Generate_WelcomeTitle"]</h2>
                     <p class="text-white-50 mx-auto welcome-subtitle">
-                        Tell me what you're craving, how much time you have, or let me inspire you with whatever ingredients
-                        you currently have stocked in your storage!
+                        @L["Generate_WelcomeSubtitle"]
                     </p>
                     <div class="d-flex flex-wrap justify-content-center gap-2 mt-4 suggestion-chips">
                         <button type="button" class="btn btn-outline-light btn-sm suggestion-btn"
-                                @onclick="@(() => SetPrompt("Quick 20-minute dinner using my fridge items"))">
-                            ⚡ Quick 20-min dinner
+                                @onclick="@(() => SetPrompt(L["Generate_Chip1Prompt"]))">
+                            @L["Generate_Chip1Label"]
                         </button>
                         <button type="button" class="btn btn-outline-light btn-sm suggestion-btn"
-                                @onclick="@(() => SetPrompt("Warm cozy comfort food for today"))">
-                            🍲 Warm comfort food
+                                @onclick="@(() => SetPrompt(L["Generate_Chip2Prompt"]))">
+                            @L["Generate_Chip2Label"]
                         </button>
                         <button type="button" class="btn btn-outline-light btn-sm suggestion-btn"
-                                @onclick="@(() => SetPrompt("Healthy high-protein meal"))">
-                            🥗 High-protein meal
+                                @onclick="@(() => SetPrompt(L["Generate_Chip3Prompt"]))">
+                            @L["Generate_Chip3Label"]
                         </button>
                     </div>
                 </div>
@@ -67,8 +66,8 @@
             {
                 <div class="ai-response-wrapper d-flex flex-column align-items-center text-center my-4 py-4">
                     <div class="spinner-border text-accent mb-3" role="status"></div>
-                    <h5 class="fw-bold text-white mb-1">Crafting tailored recipes...</h5>
-                    <p class="text-white-50 small mb-0">Analyzing ingredients and cooking techniques</p>
+                    <h5 class="fw-bold text-white mb-1">@L["Generate_CraftingTitle"]</h5>
+                    <p class="text-white-50 small mb-0">@L["Generate_CraftingSubtitle"]</p>
                 </div>
             }
             else if (_recentRecipes.Count > 0)
@@ -77,7 +76,7 @@
                 <div class="ai-response-wrapper d-flex flex-column gap-3">
                     <div class="d-flex align-items-center gap-2 text-white-50 small ai-meta-label">
                         <i class="bi bi-stars text-accent fs-6"></i>
-                        <span>AI Generated Suggestions</span>
+                        <span>@L["Generate_AiSuggestions"]</span>
                     </div>
 
                     <div class="row row-cols-1 row-cols-md-3 g-3 justify-content-center">
@@ -102,14 +101,14 @@
                 <i class="bi bi-stars text-accent fs-5 ms-3 me-2" aria-hidden="true"></i>
 
                 <input type="text" class="form-control generate-input-field text-white bg-transparent border-0"
-                       placeholder="Ask for recipe ideas, e.g. quick dinner with chicken and tomatoes..."
+                       placeholder="@L["Generate_InputPlaceholder"]"
                        value="@_currentPrompt" @oninput="(e => _currentPrompt = e.Value?.ToString() ?? string.Empty)"
-                       disabled="@_isGenerating" aria-label="Recipe prompt" />
+                       disabled="@_isGenerating" aria-label="@L["Generate_InputAria"]" />
 
                 <button type="submit"
                         class="btn btn-accent btn-send-prompt d-flex align-items-center justify-content-center"
                         disabled="@(string.IsNullOrWhiteSpace(_currentPrompt) || _isGenerating)"
-                        aria-label="Generate recipes">
+                        aria-label="@L["Generate_SubmitAria"]">
                     <i class="bi bi-arrow-up-circle-fill fs-4" aria-hidden="true"></i>
                 </button>
             </form>
@@ -118,11 +117,10 @@
 </section>
 
 @* Confirmation Modal for replacing existing generated recipes *@
-<ConfirmationModal Id="confirmGenerationModal" Title="Generate New Recipes?" Icon="bi-exclamation-triangle"
-                   ConfirmText="Generate" ConfirmButtonClass="btn-accent" OnConfirm="ExecuteGenerationAsync">
+<ConfirmationModal Id="confirmGenerationModal" Title="@L["Generate_ConfirmTitle"]" Icon="bi-exclamation-triangle"
+                   ConfirmText="@L["Generate_ConfirmButton"]" ConfirmButtonClass="btn-accent" OnConfirm="ExecuteGenerationAsync">
     <p class="mb-0">
-        Are you sure you want to create new recipes? If you already have recipes, they will be deleted! Make sure you've
-        saved them in your recipe book!
+        @L["Generate_ConfirmMessage"]
     </p>
 </ConfirmationModal>
 

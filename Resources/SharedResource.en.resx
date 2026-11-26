@@ -1,0 +1,731 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Nav_Recipes" xml:space="preserve">
+    <value>Recipes</value>
+  </data>
+  <data name="Nav_Workspace" xml:space="preserve">
+    <value>Workspace</value>
+  </data>
+  <data name="Nav_Logout" xml:space="preserve">
+    <value>Logout</value>
+  </data>
+  <data name="Nav_SignIn" xml:space="preserve">
+    <value>Sign In</value>
+  </data>
+  <data name="Nav_User" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="Lang_Ukrainian" xml:space="preserve">
+    <value>Українська</value>
+  </data>
+  <data name="Lang_English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Lang_Select" xml:space="preserve">
+    <value>Language</value>
+  </data>
+
+  <!-- Common -->
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Common_Proceed" xml:space="preserve">
+    <value>Proceed</value>
+  </data>
+  <data name="Common_ConfirmTitle" xml:space="preserve">
+    <value>Are you sure?</value>
+  </data>
+  <data name="Common_Loading" xml:space="preserve">
+    <value>Loading...</value>
+  </data>
+  <data name="Common_SearchPlaceholder" xml:space="preserve">
+    <value>Search...</value>
+  </data>
+  <data name="Common_ClearSearch" xml:space="preserve">
+    <value>Clear search</value>
+  </data>
+  <data name="Common_Reload" xml:space="preserve">
+    <value>Reload</value>
+  </data>
+  <data name="Common_UnhandledError" xml:space="preserve">
+    <value>An unhandled error has occurred.</value>
+  </data>
+  <data name="Common_MinutesShort" xml:space="preserve">
+    <value>{0} mins</value>
+  </data>
+  <data name="Common_Serving_One" xml:space="preserve">
+    <value>{0} serving</value>
+  </data>
+  <data name="Common_Serving_Few" xml:space="preserve">
+    <value>{0} servings</value>
+  </data>
+  <data name="Common_Serving_Many" xml:space="preserve">
+    <value>{0} servings</value>
+  </data>
+  <data name="Common_Item_One" xml:space="preserve">
+    <value>{0} item</value>
+  </data>
+  <data name="Common_Item_Few" xml:space="preserve">
+    <value>{0} items</value>
+  </data>
+  <data name="Common_Item_Many" xml:space="preserve">
+    <value>{0} items</value>
+  </data>
+
+  <!-- Enums & Categories -->
+  <data name="Unit_Grams" xml:space="preserve">
+    <value>Grams</value>
+  </data>
+  <data name="Unit_Milliliters" xml:space="preserve">
+    <value>Milliliters</value>
+  </data>
+  <data name="Unit_Pieces" xml:space="preserve">
+    <value>Pieces</value>
+  </data>
+  <data name="Unit_Cloves" xml:space="preserve">
+    <value>Cloves</value>
+  </data>
+  <data name="Unit_Sprigs" xml:space="preserve">
+    <value>Sprigs</value>
+  </data>
+  <data name="Unit_Pinch" xml:space="preserve">
+    <value>Pinch</value>
+  </data>
+  <data name="Unit_Tablespoons" xml:space="preserve">
+    <value>Tablespoons</value>
+  </data>
+  <data name="Unit_Teaspoons" xml:space="preserve">
+    <value>Teaspoons</value>
+  </data>
+  <data name="Unit_Cups" xml:space="preserve">
+    <value>Cups</value>
+  </data>
+  <data name="UnitShort_Grams" xml:space="preserve">
+    <value>g</value>
+  </data>
+  <data name="UnitShort_Milliliters" xml:space="preserve">
+    <value>ml</value>
+  </data>
+  <data name="UnitShort_Pieces" xml:space="preserve">
+    <value>pcs</value>
+  </data>
+  <data name="UnitShort_Cloves" xml:space="preserve">
+    <value>cloves</value>
+  </data>
+  <data name="UnitShort_Sprigs" xml:space="preserve">
+    <value>sprigs</value>
+  </data>
+  <data name="UnitShort_Pinch" xml:space="preserve">
+    <value>pinch</value>
+  </data>
+  <data name="UnitShort_Tablespoons" xml:space="preserve">
+    <value>tbsp</value>
+  </data>
+  <data name="UnitShort_Teaspoons" xml:space="preserve">
+    <value>tsp</value>
+  </data>
+  <data name="UnitShort_Cups" xml:space="preserve">
+    <value>cups</value>
+  </data>
+  <data name="Processing_Raw" xml:space="preserve">
+    <value>Raw</value>
+  </data>
+  <data name="Processing_Processed" xml:space="preserve">
+    <value>Processed</value>
+  </data>
+  <data name="Processing_UltraProcessed" xml:space="preserve">
+    <value>Ultra-Processed</value>
+  </data>
+  <data name="Role_FamilyHead" xml:space="preserve">
+    <value>Family Head</value>
+  </data>
+  <data name="Role_FamilyMember" xml:space="preserve">
+    <value>Family Member</value>
+  </data>
+  <data name="Role_Admin" xml:space="preserve">
+    <value>Admin</value>
+  </data>
+  <data name="Role_Guest" xml:space="preserve">
+    <value>Guest</value>
+  </data>
+  <data name="Category_Produce" xml:space="preserve">
+    <value>Produce</value>
+  </data>
+  <data name="Category_DairyAndEggs" xml:space="preserve">
+    <value>Dairy &amp; Eggs</value>
+  </data>
+  <data name="Category_MeatAndPoultry" xml:space="preserve">
+    <value>Meat &amp; Poultry</value>
+  </data>
+  <data name="Category_PantryAndGrains" xml:space="preserve">
+    <value>Pantry &amp; Grains</value>
+  </data>
+  <data name="Category_Bakery" xml:space="preserve">
+    <value>Bakery</value>
+  </data>
+  <data name="Category_CondimentsAndSpices" xml:space="preserve">
+    <value>Condiments &amp; Spices</value>
+  </data>
+  <data name="Category_Beverages" xml:space="preserve">
+    <value>Beverages</value>
+  </data>
+
+  <!-- Routes, Home, Hero, Footer, Error, NotFound, Reconnect -->
+  <data name="Routes_AccessDenied" xml:space="preserve">
+    <value>Access Denied</value>
+  </data>
+  <data name="Routes_SignInPrompt" xml:space="preserve">
+    <value>Please sign in to access this page.</value>
+  </data>
+  <data name="Footer_Copyright" xml:space="preserve">
+    <value>© 2026 Digital Web Fridge. Crafting cozy culinary experiences.</value>
+  </data>
+  <data name="Home_PageTitle" xml:space="preserve">
+    <value>Digital Web Fridge - Home</value>
+  </data>
+  <data name="Hero_Slogan" xml:space="preserve">
+    <value>Track ingredients effortlessly, reduce food waste, and cook delicious warm meals with whatever you have left in your kitchen.</value>
+  </data>
+  <data name="Hero_GoToWorkspace" xml:space="preserve">
+    <value>Go to workspace</value>
+  </data>
+  <data name="Hero_ViewPublicRecipes" xml:space="preserve">
+    <value>View public recipes</value>
+  </data>
+  <data name="ErrorCard_DefaultTitle" xml:space="preserve">
+    <value>Oops!</value>
+  </data>
+  <data name="ErrorCard_DefaultMessage" xml:space="preserve">
+    <value>Something went wrong.</value>
+  </data>
+  <data name="ErrorCard_GoHome" xml:space="preserve">
+    <value>Go to homepage</value>
+  </data>
+  <data name="ErrorCard_ViewRecipes" xml:space="preserve">
+    <value>View public recipes</value>
+  </data>
+  <data name="NotFound_PageTitle" xml:space="preserve">
+    <value>Not Found - Digital Web Fridge</value>
+  </data>
+  <data name="NotFound_Title" xml:space="preserve">
+    <value>Oops. Not found!</value>
+  </data>
+  <data name="NotFound_Message" xml:space="preserve">
+    <value>The page you are looking for probably does not exist. Please double-check the URL you entered.</value>
+  </data>
+  <data name="Error_PageTitle" xml:space="preserve">
+    <value>Error - Digital Web Fridge</value>
+  </data>
+  <data name="Error_Title" xml:space="preserve">
+    <value>Something went wrong.</value>
+  </data>
+  <data name="Error_Message" xml:space="preserve">
+    <value>An unexpected error occurred while processing your request. Please try again later.</value>
+  </data>
+  <data name="Error_RequestId" xml:space="preserve">
+    <value>Request ID:</value>
+  </data>
+  <data name="Reconnect_FirstAttempt" xml:space="preserve">
+    <value>Rejoining the server...</value>
+  </data>
+  <data name="Reconnect_RepeatedAttemptPrefix" xml:space="preserve">
+    <value>Rejoin failed... trying again in</value>
+  </data>
+  <data name="Reconnect_RepeatedAttemptSuffix" xml:space="preserve">
+    <value>seconds.</value>
+  </data>
+  <data name="Reconnect_FailedLine1" xml:space="preserve">
+    <value>Failed to rejoin.</value>
+  </data>
+  <data name="Reconnect_FailedLine2" xml:space="preserve">
+    <value>Please retry or reload the page.</value>
+  </data>
+  <data name="Reconnect_Retry" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+  <data name="Reconnect_Paused" xml:space="preserve">
+    <value>The session has been paused by the server.</value>
+  </data>
+  <data name="Reconnect_ResumeFailedLine1" xml:space="preserve">
+    <value>Failed to resume the session.</value>
+  </data>
+  <data name="Reconnect_Resume" xml:space="preserve">
+    <value>Resume</value>
+  </data>
+
+  <!-- WorkspaceNavDash -->
+  <data name="WorkspaceNav_AriaLabel" xml:space="preserve">
+    <value>Workspace Navigation</value>
+  </data>
+  <data name="WorkspaceNav_Storage" xml:space="preserve">
+    <value>Storage</value>
+  </data>
+  <data name="WorkspaceNav_Generate" xml:space="preserve">
+    <value>Generate</value>
+  </data>
+  <data name="WorkspaceNav_AddProduct" xml:space="preserve">
+    <value>Add product</value>
+  </data>
+  <data name="WorkspaceNav_Recipes" xml:space="preserve">
+    <value>Recipes</value>
+  </data>
+  <data name="WorkspaceNav_Profile" xml:space="preserve">
+    <value>Profile</value>
+  </data>
+
+  <!-- RecipeCard, Recipes & RecipeDetails -->
+  <data name="RecipeCard_DefaultDescription" xml:space="preserve">
+    <value>A mouth-watering dish crafted with fresh ingredients.</value>
+  </data>
+  <data name="RecipeCard_IngredientsAria" xml:space="preserve">
+    <value>Ingredients</value>
+  </data>
+  <data name="Recipes_PageTitle" xml:space="preserve">
+    <value>Public Recipes - Digital Web Fridge</value>
+  </data>
+  <data name="Recipes_Title" xml:space="preserve">
+    <value>Community Recipes</value>
+  </data>
+  <data name="Recipes_Subtitle" xml:space="preserve">
+    <value>Explore culinary ideas crafted from everyday fridge staples. Discover dishes you can make right now.</value>
+  </data>
+  <data name="Recipes_SearchPlaceholder" xml:space="preserve">
+    <value>Search by ingredients (e.g. eggs, tomatoes, chicken) or recipe title...</value>
+  </data>
+  <data name="Recipes_SearchAria" xml:space="preserve">
+    <value>Search recipes by ingredients or title</value>
+  </data>
+  <data name="Recipes_SearchTip" xml:space="preserve">
+    <value>Tip: Enter ingredients separated by commas to filter by what is currently in your fridge</value>
+  </data>
+  <data name="Recipes_Loading" xml:space="preserve">
+    <value>Loading recipes...</value>
+  </data>
+  <data name="Recipes_EmptyTitle" xml:space="preserve">
+    <value>No matching recipes found</value>
+  </data>
+  <data name="Recipes_EmptyHint" xml:space="preserve">
+    <value>Try searching with fewer ingredients, such as "eggs", "garlic", or "pasta".</value>
+  </data>
+  <data name="Recipes_ShowAll" xml:space="preserve">
+    <value>Show all recipes</value>
+  </data>
+  <data name="RecipeDetails_PageTitleFallback" xml:space="preserve">
+    <value>Recipe Details</value>
+  </data>
+  <data name="RecipeDetails_BackToFamily" xml:space="preserve">
+    <value>Back to Family Recipes</value>
+  </data>
+  <data name="RecipeDetails_BackToSaved" xml:space="preserve">
+    <value>Back to Saved Recipes</value>
+  </data>
+  <data name="RecipeDetails_BackToRecipes" xml:space="preserve">
+    <value>Back to Recipes</value>
+  </data>
+  <data name="RecipeDetails_Loading" xml:space="preserve">
+    <value>Loading recipe...</value>
+  </data>
+  <data name="RecipeDetails_NotFoundTitle" xml:space="preserve">
+    <value>Recipe Not Found</value>
+  </data>
+  <data name="RecipeDetails_NotFoundMessage" xml:space="preserve">
+    <value>The recipe you are looking for does not exist or may have been removed.</value>
+  </data>
+  <data name="RecipeDetails_BrowsePublic" xml:space="preserve">
+    <value>Browse Public Recipes</value>
+  </data>
+  <data name="RecipeDetails_CopyLinkTitle" xml:space="preserve">
+    <value>Click to copy public recipe link</value>
+  </data>
+  <data name="RecipeDetails_Copied" xml:space="preserve">
+    <value>Copied!</value>
+  </data>
+  <data name="RecipeDetails_RemovePersonal" xml:space="preserve">
+    <value>Remove from personal recipes</value>
+  </data>
+  <data name="RecipeDetails_AddPersonal" xml:space="preserve">
+    <value>Add to personal recipes</value>
+  </data>
+  <data name="RecipeDetails_PersonalBookmarkAria" xml:space="preserve">
+    <value>Personal bookmark</value>
+  </data>
+  <data name="RecipeDetails_RemoveFamily" xml:space="preserve">
+    <value>Remove from family recipes</value>
+  </data>
+  <data name="RecipeDetails_AddFamily" xml:space="preserve">
+    <value>Add to family recipes</value>
+  </data>
+  <data name="RecipeDetails_FamilyBookmarkAria" xml:space="preserve">
+    <value>Family bookmark</value>
+  </data>
+  <data name="RecipeDetails_MakePublicTitle" xml:space="preserve">
+    <value>Make recipe publicly accessible</value>
+  </data>
+  <data name="RecipeDetails_Share" xml:space="preserve">
+    <value>Share</value>
+  </data>
+  <data name="RecipeDetails_Added" xml:space="preserve">
+    <value>Added</value>
+  </data>
+  <data name="RecipeDetails_PrepTime" xml:space="preserve">
+    <value>Prep Time</value>
+  </data>
+  <data name="RecipeDetails_Yields" xml:space="preserve">
+    <value>Yields</value>
+  </data>
+  <data name="RecipeDetails_Ingredients" xml:space="preserve">
+    <value>Ingredients</value>
+  </data>
+  <data name="RecipeDetails_NoIngredients" xml:space="preserve">
+    <value>No ingredients specified.</value>
+  </data>
+  <data name="RecipeDetails_DefaultItemName" xml:space="preserve">
+    <value>Item</value>
+  </data>
+  <data name="RecipeDetails_Optional" xml:space="preserve">
+    <value>optional</value>
+  </data>
+  <data name="RecipeDetails_Instructions" xml:space="preserve">
+    <value>Instructions</value>
+  </data>
+
+  <!-- ProductFormFields, StorageItemModal & WorkspaceStorage -->
+  <data name="ProductForm_NameLabel" xml:space="preserve">
+    <value>Product Name</value>
+  </data>
+  <data name="ProductForm_NamePlaceholder" xml:space="preserve">
+    <value>e.g. Greek Yogurt, Tomatoes...</value>
+  </data>
+  <data name="ProductForm_CategoryLabel" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="ProductForm_CategorySelect" xml:space="preserve">
+    <value>Select a category...</value>
+  </data>
+  <data name="ProductForm_CategoryFilterPlaceholder" xml:space="preserve">
+    <value>Filter categories...</value>
+  </data>
+  <data name="ProductForm_QuantityLabel" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="ProductForm_UnitLabel" xml:space="preserve">
+    <value>Measurement Unit</value>
+  </data>
+  <data name="ProductForm_ProcessingLevelLabel" xml:space="preserve">
+    <value>Processing Level</value>
+  </data>
+  <data name="ProductForm_ProcessingNone" xml:space="preserve">
+    <value>None / Unspecified</value>
+  </data>
+  <data name="ProductForm_ExpirationDateLabel" xml:space="preserve">
+    <value>Expiration Date</value>
+  </data>
+  <data name="ProductForm_BarcodeLabel" xml:space="preserve">
+    <value>Barcode (Optional)</value>
+  </data>
+  <data name="ProductForm_BarcodePlaceholder" xml:space="preserve">
+    <value>e.g. 012345678905</value>
+  </data>
+  <data name="ProductForm_NameRequired" xml:space="preserve">
+    <value>Product name is required.</value>
+  </data>
+  <data name="StorageModal_EditTitle" xml:space="preserve">
+    <value>Edit Storage Item</value>
+  </data>
+  <data name="StorageModal_AddTitle" xml:space="preserve">
+    <value>Add Storage Item</value>
+  </data>
+  <data name="StorageModal_SaveChanges" xml:space="preserve">
+    <value>Save Changes</value>
+  </data>
+  <data name="StorageModal_AddToStorage" xml:space="preserve">
+    <value>Add to Storage</value>
+  </data>
+  <data name="Storage_PageTitle" xml:space="preserve">
+    <value>Storage - Workspace</value>
+  </data>
+  <data name="Storage_Title" xml:space="preserve">
+    <value>Current Inventory</value>
+  </data>
+  <data name="Storage_Subtitle" xml:space="preserve">
+    <value>Track and manage groceries in your household fridge and pantry.</value>
+  </data>
+  <data name="Storage_AddProduct" xml:space="preserve">
+    <value>Add Product</value>
+  </data>
+  <data name="Storage_Loading" xml:space="preserve">
+    <value>Loading inventory...</value>
+  </data>
+  <data name="Storage_EmptyTitle" xml:space="preserve">
+    <value>Your fridge is empty</value>
+  </data>
+  <data name="Storage_EmptyHint" xml:space="preserve">
+    <value>Start stocking up! Add products manually to keep track of ingredients and expiration dates.</value>
+  </data>
+  <data name="Storage_AddFirstItem" xml:space="preserve">
+    <value>Add your first item</value>
+  </data>
+  <data name="Storage_Uncategorized" xml:space="preserve">
+    <value>Uncategorized</value>
+  </data>
+  <data name="Storage_UnnamedProduct" xml:space="preserve">
+    <value>Unnamed Product</value>
+  </data>
+  <data name="Storage_ExpirationPrefix" xml:space="preserve">
+    <value>Exp:</value>
+  </data>
+  <data name="Storage_EditItem" xml:space="preserve">
+    <value>Edit item</value>
+  </data>
+  <data name="Storage_DeleteItem" xml:space="preserve">
+    <value>Delete item</value>
+  </data>
+  <data name="Storage_DeleteTitle" xml:space="preserve">
+    <value>Delete Product</value>
+  </data>
+  <data name="Storage_DeleteConfirmText" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Storage_DeletePromptPrefix" xml:space="preserve">
+    <value>Are you sure you want to remove</value>
+  </data>
+  <data name="Storage_DeletePromptSuffix" xml:space="preserve">
+    <value>from your storage?</value>
+  </data>
+  <data name="Storage_ThisProduct" xml:space="preserve">
+    <value>this product</value>
+  </data>
+
+  <!-- WorkspaceAddProduct -->
+  <data name="AddProduct_PageTitle" xml:space="preserve">
+    <value>Add Product - Workspace</value>
+  </data>
+  <data name="AddProduct_Title" xml:space="preserve">
+    <value>Add Product</value>
+  </data>
+  <data name="AddProduct_Subtitle" xml:space="preserve">
+    <value>Scan items using your camera or enter details manually into your inventory.</value>
+  </data>
+  <data name="AddProduct_ModeCamera" xml:space="preserve">
+    <value>Camera</value>
+  </data>
+  <data name="AddProduct_ModeManual" xml:space="preserve">
+    <value>Manual</value>
+  </data>
+  <data name="AddProduct_CameraStarting" xml:space="preserve">
+    <value>Requesting camera access...</value>
+  </data>
+  <data name="AddProduct_CameraUnavailable" xml:space="preserve">
+    <value>Camera Unavailable</value>
+  </data>
+  <data name="AddProduct_TryAgain" xml:space="preserve">
+    <value>Try Again</value>
+  </data>
+  <data name="AddProduct_TakePhoto" xml:space="preserve">
+    <value>Take photo</value>
+  </data>
+  <data name="AddProduct_Processing" xml:space="preserve">
+    <value>Processing...</value>
+  </data>
+  <data name="AddProduct_ProductDetails" xml:space="preserve">
+    <value>Product Details</value>
+  </data>
+  <data name="AddProduct_SubmitButton" xml:space="preserve">
+    <value>Add product</value>
+  </data>
+  <data name="AddProduct_CameraErrorDefault" xml:space="preserve">
+    <value>Could not access camera.</value>
+  </data>
+  <data name="AddProduct_CameraErrorVideoNotFound" xml:space="preserve">
+    <value>Video element not found.</value>
+  </data>
+  <data name="AddProduct_CameraErrorNotSupported" xml:space="preserve">
+    <value>Camera is not supported on this device/browser.</value>
+  </data>
+  <data name="AddProduct_CameraErrorPermissionDenied" xml:space="preserve">
+    <value>Camera permission denied.</value>
+  </data>
+
+  <!-- WorkspaceGenerate -->
+  <data name="Generate_PageTitle" xml:space="preserve">
+    <value>Generate - Workspace</value>
+  </data>
+  <data name="Generate_WelcomeTitle" xml:space="preserve">
+    <value>Smart Recipe Assistant</value>
+  </data>
+  <data name="Generate_WelcomeSubtitle" xml:space="preserve">
+    <value>Tell me what you're craving, how much time you have, or let me inspire you with whatever ingredients you currently have stocked in your storage!</value>
+  </data>
+  <data name="Generate_Chip1Label" xml:space="preserve">
+    <value>⚡ Quick 20-min dinner</value>
+  </data>
+  <data name="Generate_Chip1Prompt" xml:space="preserve">
+    <value>Quick 20-minute dinner using my fridge items</value>
+  </data>
+  <data name="Generate_Chip2Label" xml:space="preserve">
+    <value>🍲 Warm comfort food</value>
+  </data>
+  <data name="Generate_Chip2Prompt" xml:space="preserve">
+    <value>Warm cozy comfort food for today</value>
+  </data>
+  <data name="Generate_Chip3Label" xml:space="preserve">
+    <value>🥗 High-protein meal</value>
+  </data>
+  <data name="Generate_Chip3Prompt" xml:space="preserve">
+    <value>Healthy high-protein meal</value>
+  </data>
+  <data name="Generate_CraftingTitle" xml:space="preserve">
+    <value>Crafting tailored recipes...</value>
+  </data>
+  <data name="Generate_CraftingSubtitle" xml:space="preserve">
+    <value>Analyzing ingredients and cooking techniques</value>
+  </data>
+  <data name="Generate_AiSuggestions" xml:space="preserve">
+    <value>AI Generated Suggestions</value>
+  </data>
+  <data name="Generate_InputPlaceholder" xml:space="preserve">
+    <value>Ask for recipe ideas, e.g. quick dinner with chicken and tomatoes...</value>
+  </data>
+  <data name="Generate_InputAria" xml:space="preserve">
+    <value>Recipe prompt</value>
+  </data>
+  <data name="Generate_SubmitAria" xml:space="preserve">
+    <value>Generate recipes</value>
+  </data>
+  <data name="Generate_ConfirmTitle" xml:space="preserve">
+    <value>Generate New Recipes?</value>
+  </data>
+  <data name="Generate_ConfirmButton" xml:space="preserve">
+    <value>Generate</value>
+  </data>
+  <data name="Generate_ConfirmMessage" xml:space="preserve">
+    <value>Are you sure you want to create new recipes? If you already have recipes, they will be deleted! Make sure you've saved them in your recipe book!</value>
+  </data>
+
+  <!-- WorkspaceRecipes -->
+  <data name="SavedRecipes_PageTitle" xml:space="preserve">
+    <value>Saved Recipes - Workspace</value>
+  </data>
+  <data name="SavedRecipes_Title" xml:space="preserve">
+    <value>Saved Recipes</value>
+  </data>
+  <data name="SavedRecipes_SubtitlePersonal" xml:space="preserve">
+    <value>Your private bookmarks and personalized culinary discoveries.</value>
+  </data>
+  <data name="SavedRecipes_SubtitleFamily" xml:space="preserve">
+    <value>Recipes shared and saved across your household family.</value>
+  </data>
+  <data name="SavedRecipes_ScopePersonal" xml:space="preserve">
+    <value>Personal</value>
+  </data>
+  <data name="SavedRecipes_ScopeFamily" xml:space="preserve">
+    <value>Family</value>
+  </data>
+  <data name="SavedRecipes_SearchPlaceholder" xml:space="preserve">
+    <value>Search saved recipes by ingredients or title...</value>
+  </data>
+  <data name="SavedRecipes_SearchAria" xml:space="preserve">
+    <value>Search saved recipes by ingredients or title</value>
+  </data>
+  <data name="SavedRecipes_SearchTip" xml:space="preserve">
+    <value>Tip: Enter ingredients separated by commas to filter saved recipes by what you have</value>
+  </data>
+  <data name="SavedRecipes_EmptyPersonalTitle" xml:space="preserve">
+    <value>No personal recipes saved yet</value>
+  </data>
+  <data name="SavedRecipes_EmptyFamilyTitle" xml:space="preserve">
+    <value>No family recipes saved yet</value>
+  </data>
+  <data name="SavedRecipes_EmptySearchTitle" xml:space="preserve">
+    <value>No matching saved recipes found</value>
+  </data>
+  <data name="SavedRecipes_EmptyHint" xml:space="preserve">
+    <value>Browse our public recipes collection and bookmark the meals you would love to cook.</value>
+  </data>
+  <data name="SavedRecipes_EmptySearchHint" xml:space="preserve">
+    <value>Try adjusting your search terms or clearing the filter.</value>
+  </data>
+  <data name="SavedRecipes_DiscoverPublic" xml:space="preserve">
+    <value>Discover Public Recipes</value>
+  </data>
+  <data name="SavedRecipes_ShowAllPersonal" xml:space="preserve">
+    <value>Show all personal recipes</value>
+  </data>
+  <data name="SavedRecipes_ShowAllFamily" xml:space="preserve">
+    <value>Show all family recipes</value>
+  </data>
+
+  <!-- WorkspaceProfile & FamilyMembersGrid -->
+  <data name="Profile_PageTitle" xml:space="preserve">
+    <value>Profile - Workspace</value>
+  </data>
+  <data name="Profile_FamilyFallback" xml:space="preserve">
+    <value>Family</value>
+  </data>
+  <data name="Profile_CopyFamilyIdTitle" xml:space="preserve">
+    <value>Copy full Family ID</value>
+  </data>
+  <data name="Profile_LeaveFamily" xml:space="preserve">
+    <value>Leave family</value>
+  </data>
+  <data name="Profile_JoinAnotherFamily" xml:space="preserve">
+    <value>Join another family</value>
+  </data>
+  <data name="Profile_NewFamilyIdPlaceholder" xml:space="preserve">
+    <value>New family ID…</value>
+  </data>
+  <data name="Profile_JoinFamily" xml:space="preserve">
+    <value>Join family</value>
+  </data>
+  <data name="Profile_JoinModalBody" xml:space="preserve">
+    <value>Your personal recipes remain yours, but storage and family recipes will be updated with the new family's content.</value>
+  </data>
+  <data name="Profile_JoinModalHeadNote" xml:space="preserve">
+    <value> All your family members will be moved to the new family with you.</value>
+  </data>
+  <data name="Profile_LeaveModalBody" xml:space="preserve">
+    <value>Your personal recipes remain yours, but you will lose access to this family's storage and shared recipes. You will become the head of your own household.</value>
+  </data>
+  <data name="Profile_InvalidFamilyId" xml:space="preserve">
+    <value>Please enter a valid family ID (UUID format).</value>
+  </data>
+  <data name="Profile_FamilyNotFound" xml:space="preserve">
+    <value>Family not found. Double-check the ID and try again.</value>
+  </data>
+  <data name="FamilyGrid_Title" xml:space="preserve">
+    <value>Family members ({0})</value>
+  </data>
+  <data name="FamilyGrid_ColUser" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="FamilyGrid_ColRole" xml:space="preserve">
+    <value>Role</value>
+  </data>
+  <data name="FamilyGrid_ColJoined" xml:space="preserve">
+    <value>Joined</value>
+  </data>
+  <data name="FamilyGrid_ColAction" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="FamilyGrid_Kick" xml:space="preserve">
+    <value>Kick</value>
+  </data>
+  <data name="FamilyGrid_KickMessageSuffix" xml:space="preserve">
+    <value>will be removed from your family and placed in their own household.</value>
+  </data>
+</root>

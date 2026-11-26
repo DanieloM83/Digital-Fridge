@@ -13,7 +13,7 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IJSRuntime JS
 
-<PageTitle>Storage - Workspace</PageTitle>
+<PageTitle>@L["Storage_PageTitle"]</PageTitle>
 
 <section class="workspace-storage-page py-4">
     <div class="container pt-2 pb-5 storage-content-container">
@@ -22,16 +22,16 @@
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
             <div>
                 <h1 class="storage-title fw-bold text-white mb-1">
-                    Current Inventory
+                    @L["Storage_Title"]
                 </h1>
                 <p class="text-white-50 small mb-0">
-                    Track and manage groceries in your household fridge and pantry.
+                    @L["Storage_Subtitle"]
                 </p>
             </div>
 
             <button type="button" class="btn btn-accent d-inline-flex align-items-center gap-2" @onclick="OpenAddModal">
                 <i class="bi bi-patch-plus fs-5" aria-hidden="true"></i>
-                <span>Add Product</span>
+                <span>@L["Storage_AddProduct"]</span>
             </button>
         </div>
 
@@ -39,7 +39,7 @@
         {
             <div class="d-flex justify-content-center py-5">
                 <div class="spinner-border text-accent" role="status">
-                    <span class="visually-hidden">Loading inventory...</span>
+                    <span class="visually-hidden">@L["Storage_Loading"]</span>
                 </div>
             </div>
         }
@@ -47,12 +47,12 @@
         {
             <div class="glass-card text-center text-white py-5 px-4 empty-storage-card mx-auto my-5">
                 <i class="bi bi-shop-window display-4 text-accent mb-3 d-block" aria-hidden="true"></i>
-                <h3 class="fw-bold mb-2">Your fridge is empty</h3>
+                <h3 class="fw-bold mb-2">@L["Storage_EmptyTitle"]</h3>
                 <p class="text-white-50 mb-4 small">
-                    Start stocking up! Add products manually to keep track of ingredients and expiration dates.
+                    @L["Storage_EmptyHint"]
                 </p>
                 <button type="button" class="btn btn-accent" @onclick="OpenAddModal">
-                    <i class="bi bi-patch-plus me-1"></i>Add your first item
+                    <i class="bi bi-patch-plus me-1"></i>@L["Storage_AddFirstItem"]
                 </button>
             </div>
         }
@@ -77,7 +77,7 @@
                                     @categoryName
                                 </h3>
                                 <span class="badge category-count-badge">
-                                    @group.Items.Count @(group.Items.Count == 1 ? "item" : "items")
+                                    @LocalizationHelper.FormatCount(L, group.Items.Count, "Common_Item_One", "Common_Item_Few", "Common_Item_Many")
                                 </span>
                             </div>
                         </div>
@@ -93,18 +93,18 @@
                                         <div class="d-flex align-items-center gap-3 flex-grow-1">
                                             <div class="item-info">
                                                 <div class="item-name fw-medium text-white">
-                                                    @(item.Product?.Name ?? "Unnamed Product")
+                                                    @(item.Product?.Name ?? L["Storage_UnnamedProduct"])
                                                 </div>
                                                 <div class="item-meta small text-white-50 d-flex flex-wrap align-items-center gap-2">
                                                     <span class="text-accent fw-semibold">
-                                                        @FormatQuantity(item.Quantity) @item.Unit
+                                                        @FormatQuantity(item.Quantity) @LocalizationHelper.GetUnitLabel(L, item.Unit, shortForm: true)
                                                     </span>
                                                     @if (item.ExpirationDate.HasValue)
                                                     {
                                                         <span class="text-white-25">•</span>
                                                         <span class="@GetExpirationBadgeClass(item.ExpirationDate.Value)">
-                                                            <i class="bi bi-calendar-event me-1"></i>Exp:
-                                                            @item.ExpirationDate.Value.ToString("MMM d, yyyy")
+                                                            <i class="bi bi-calendar-event me-1"></i>@L["Storage_ExpirationPrefix"]
+                                                            @item.ExpirationDate.Value.ToString("MMM d, yyyy", System.Globalization.CultureInfo.CurrentUICulture)
                                                         </span>
                                                     }
                                                 </div>
@@ -113,13 +113,13 @@
 
                                         @* Action Buttons: Pencil & Red Trash Can *@
                                         <div class="d-flex align-items-center gap-2 ms-3">
-                                            <button type="button" class="btn btn-icon-action btn-edit" title="Edit item"
-                                                    aria-label="Edit item" @onclick="() => OpenEditModal(item)">
+                                            <button type="button" class="btn btn-icon-action btn-edit" title="@L["Storage_EditItem"]"
+                                                    aria-label="@L["Storage_EditItem"]" @onclick="() => OpenEditModal(item)">
                                                 <i class="bi bi-pencil" aria-hidden="true"></i>
                                             </button>
 
-                                            <button type="button" class="btn btn-icon-action btn-delete text-danger" title="Delete item"
-                                                    aria-label="Delete item" @onclick="() => PromptDelete(item)">
+                                            <button type="button" class="btn btn-icon-action btn-delete text-danger" title="@L["Storage_DeleteItem"]"
+                                                    aria-label="@L["Storage_DeleteItem"]" @onclick="() => PromptDelete(item)">
                                                 <i class="bi bi-trash3" aria-hidden="true"></i>
                                             </button>
                                         </div>
@@ -140,10 +140,10 @@
                   OnSave="SaveItemAsync" />
 
 @* Confirmation Modal for Deletion *@
-<ConfirmationModal Id="deleteItemModal" Title="Delete Product" Icon="bi-trash3" ConfirmText="Delete"
+<ConfirmationModal Id="deleteItemModal" Title="@L["Storage_DeleteTitle"]" Icon="bi-trash3" ConfirmText="@L["Storage_DeleteConfirmText"]"
                    ConfirmButtonClass="btn-danger" OnConfirm="ConfirmDeleteAsync">
     <p class="mb-0">
-        Are you sure you want to remove <strong class="text-white">@(_itemToDelete?.Product?.Name ?? "this product")</strong> from your storage?
+        @L["Storage_DeletePromptPrefix"] <strong class="text-white">@(_itemToDelete?.Product?.Name ?? L["Storage_ThisProduct"])</strong> @L["Storage_DeletePromptSuffix"]
     </p>
 </ConfirmationModal>
 
@@ -190,7 +190,9 @@
             .GroupBy(i => i.Product?.Category?.CategoryId ?? 0)
             .Select(g => new CategoryGroup(
                 g.Key,
-                g.FirstOrDefault()?.Product?.Category?.Name ?? "Uncategorized",
+                g.FirstOrDefault()?.Product?.Category?.Name is { } catName
+                    ? LocalizationHelper.GetCategoryLabel(L, catName)
+                    : L["Storage_Uncategorized"].Value,
                 g.ToList()
             ))
             .OrderBy(g => g.CategoryName);

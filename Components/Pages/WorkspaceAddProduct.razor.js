@@ -3,10 +3,10 @@ let activeStream = null;
 let currentStartPromise = null;
 
 export async function startCamera(videoElement) {
-    if (!videoElement) return { success: false, error: "Video element not found." };
+    if (!videoElement) return { success: false, error: "VIDEO_NOT_FOUND" };
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        return { success: false, error: "Camera is not supported on this device/browser." };
+        return { success: false, error: "CAMERA_NOT_SUPPORTED" };
     }
 
     // If already starting or streaming to this element, reuse the in-flight start
@@ -56,7 +56,7 @@ export async function startCamera(videoElement) {
             return { success: true };
         } catch (err) {
             console.error("Camera access error:", err);
-            return { success: false, error: err.message || "Camera permission denied." };
+            return { success: false, error: err.message || "PERMISSION_DENIED" };
         } finally {
             currentStartPromise = null;
         }

@@ -45,8 +45,7 @@ public class GeminiRecipeImageGenerator : IRecipeImageGenerator
             var prompt = $"Appetizing, natural-light food photography of \"{title}\". {shortDescription}. Plated cleanly on a ceramic dish, shallow depth of field, no text or watermarks.";
             var url = $"https://generativelanguage.googleapis.com/v1beta/models/{_modelName}:generateContent";
 
-            var requestBody = new
-            {
+            var requestBody = new {
                 contents = new[]
                 {
                     new
@@ -57,8 +56,7 @@ public class GeminiRecipeImageGenerator : IRecipeImageGenerator
                         }
                     }
                 },
-                generationConfig = new
-                {
+                generationConfig = new {
                     responseModalities = new[] { "IMAGE" }
                 }
             };
@@ -97,8 +95,7 @@ public class GeminiRecipeImageGenerator : IRecipeImageGenerator
                         ? mt.GetString()
                         : inlineData.TryGetProperty("mime_type", out var mt2) ? mt2.GetString() : "image/png";
 
-                    var ext = mimeType switch
-                    {
+                    var ext = mimeType switch {
                         "image/jpeg" => "jpg",
                         "image/webp" => "webp",
                         _ => "png"
